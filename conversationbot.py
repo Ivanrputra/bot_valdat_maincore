@@ -198,7 +198,7 @@ def odp_location(update, context):
 # KET : FEEDER LOSS
 # )
     update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
-    connection.close()
+    cursor.close()
     return ConversationHandler.END
 
 def cancel(update, context):
