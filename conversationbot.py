@@ -75,29 +75,36 @@ def valdat_maincore(update, context):
     if len(split_message) != 18:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
-
+    #
     distribusi                  = split_message[1].split()
     splitter                    = split_message[3].split()
+    qrcode_port                 = split_message[5].split(':')
     odc                         = split_message[10].split()
     odc_in                      = split_message[12].split()
+    #
     odc_split                   = split_message[14].split()
+    #
     odc_out                     = split_message[16].split()
+    
 
-    d_core,odc_out_port,odc_out_core,odc_splt_out= {},{},{},{}
+    d_core,odc_out_port,odc_out_core,odc_splt_out,odp_qr= {},{},{},{}
 
-    if len(distribusi[5]) == 1:
+    if len(distribusi[5]) == 1 and len(odc_out[3]) == 1 and len(odc_out[5]) and len(odc_split[3]) == 1:
         d_core                  = distribusi[5]
         odc_out_port            = odc_out[3]
         odc_out_core            = odc_out[5]
         odc_splt_out            = odc_split[3]
+        odp_qr                  = qrcode_port[1]
+
     elif len(distribusi[5]) >= 1:
-        if len(distribusi[5].split('&')) != len(odc_out[3].split('&')) or len(distribusi[5].split('&')) != len(odc_out[5].split('&')) or len(distribusi[5].split('&')) != len(odc_split[3].split('&')):
+        if len(distribusi[5].split('&')) != len(odc_out[3].split('&')) or len(distribusi[5].split('&')) != len(odc_out[5].split('&')) or len(distribusi[5].split('&')) != len(odc_split[3].split('&') or len(distribusi[5].split('&')) != len(qrcode_port[1].split('&')):
             update.message.reply_text('Jumlah core pada odp distribusi dan odc output tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
         d_core                  = distribusi[5].split('&')
         odc_out_port            = odc_out[3].split('&')
         odc_out_core            = odc_out[5].split('&')
         odc_splt_out            = odc_split[3].split('&')
+        odp_qr                  = qrcode_port[1].split('&')
     
     for x in range(len(d_core)):
         detail = {}
@@ -114,7 +121,7 @@ def valdat_maincore(update, context):
         detail['splitter_name']       = splitter[1]+'.1-01'
         detail['splitter_kap']        = splitter[3]
         #5-9
-        detail['odp_qrcode']          = split_message[4].split(':')[1]
+        detail['odp_qrcode']          = #split_message[4].split(':')[1]
         detail['odp_port']            = split_message[5].split(':')[1]
         detail['odp_address']         = split_message[6].split(':')[1]
         detail['odp_kelurahan']       = split_message[7].split(':')[1]
