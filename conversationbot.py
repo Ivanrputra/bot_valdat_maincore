@@ -198,11 +198,11 @@ def odp_location(update, context):
         # update.message.reply_text(data[x])
         # update.message.reply_text(data[x]['odp_name']+"\n"+
         # "DS "+data[x]['distribusi_ke']+" KAP "+data[x]['distribusi_kap']+" CORE "+data[x]['distribusi_core']+"\n")
-        reply = ""
-        for key, value in data[x].items(): 
-            print(key, ":", value) 
-            # reply = reply +""+ key +"       ->  "+value+"\n"
-        update.message.reply_text(reply)
+        # reply = ""
+        # for key, value in data[x].items(): 
+        #     print(key, ":", value) 
+        #     # reply = reply +""+ key +"       ->  "+value+"\n"
+        update.message.reply_text(data[x].items())
     update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
     cursor.close()
     return ConversationHandler.END
