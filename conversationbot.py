@@ -129,7 +129,7 @@ def valdat_maincore(update, context):
         detail['in_tray']             = odc_in[1]
         detail['in_port']             = odc_in[3]
         detail['in_core']             = odc_in[5]
-        if len() > 1:
+        if len(odc_split[1]) > 1:
             detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
         else:
             detail['splt_name']       = odc_split[0]+'.1-0'+odc_split[1]
