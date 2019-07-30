@@ -87,7 +87,7 @@ def valdat_maincore(update, context):
     odc_out                     = split_message[16].split()
     
 
-    d_core,odc_out_port,odc_out_core,odc_splt_out,odp_qr= {},{},{},{}
+    d_core,odc_out_port,odc_out_core,odc_splt_out,odp_qr= {},{},{},{},{}
 
     if len(distribusi[5]) == 1 and len(odc_out[3]) == 1 and len(odc_out[5]) and len(odc_split[3]) == 1:
         d_core                  = distribusi[5]
