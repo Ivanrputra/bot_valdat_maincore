@@ -195,26 +195,13 @@ def odp_location(update, context):
                 user_location.longitude)
     data = context.user_data 
     for x in range(len(data)):
-        update.message.reply_text(data[x])
+        # update.message.reply_text(data[x])
         # update.message.reply_text(data[x]['odp_name']+"\n"+
         # "DS "+data[x]['distribusi_ke']+" KAP "+data[x]['distribusi_kap']+" CORE "+data[x]['distribusi_core']+"\n")
-    # print(update.data)        
-# 5 SPL-C KAP 8
-# QRCODE ODP
-# QRCODE PORT
-# ALAMAT
-# KELURAHAN
-# KECAMATAN
-# TO
-# ODC-BLB-FBM KAP 144
-# IN
-# OTB 1 PORT 5 CORE 5
-# TO
-# SPL-B 5 PORT 1&2
-# TO
-# OTB 9 PORT 6&7 CORE 6&7
-# KET : FEEDER LOSS
-# )
+        reply = ""
+        for key, value in data[x].items(): 
+            reply = key+'       ->  '+value+'/n'
+        update.message.reply_text(reply)
     update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
     cursor.close()
     return ConversationHandler.END
@@ -231,29 +218,6 @@ def cancel(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-
-def format(update, context):
-    """Send a message when the command /help is issued."""
-    update.message.reply_text('''
-ODP-BLB-FBM/12
-DS 3 KAP 12 CORE 6&7
-FBM/D03/13.01
-5 SPL-C KAP 8
-QRCODE ODP
-QRCODE PORT
-ALAMAT
-KELURAHAN
-KECAMATAN
-TO
-ODC-BLB-FBM KAP 144
-IN
-OTB 1 PORT 5 CORE 5
-TO
-SPL-B 5 PORT 1&2
-TO
-OTB 9 PORT 6&7 CORE 6&7
-KET : FEEDER LOSS
-''')
 
 def main():
     # Create the Updater and pass it your bot's token.
@@ -279,7 +243,7 @@ def main():
     )
 
     dp.add_handler(conv_handler)
-    dp.add_handler(CommandHandler("format", format))
+    # dp.add_handler(CommandHandler("format", format))
 
     # log all errors
     dp.add_error_handler(error)
