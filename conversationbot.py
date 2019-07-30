@@ -62,7 +62,7 @@ TO
 OTB 9 PORT 6&7 CORE 6&7
 KET : FEEDER LOSS
 ''')
-    return VALDAT_MAINCORE2
+    return VALDAT_MAINCORE
 
 
 def valdat_maincore(update, context):
