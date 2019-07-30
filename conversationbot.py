@@ -97,7 +97,7 @@ def valdat_maincore(update, context):
         odp_qr                  = qrcode_port[1]
 
     elif len(distribusi[5]) >= 1:
-        if len(distribusi[5].split('&')) != len(odc_out[3].split('&')) or len(distribusi[5].split('&')) != len(odc_out[5].split('&')) or len(distribusi[5].split('&')) != len(odc_split[3].split('&') or len(distribusi[5].split('&')) != len(qrcode_port[1].split('&')):
+        if len(distribusi[5].split('&')) != len(odc_out[3].split('&')) or len(distribusi[5].split('&')) != len(odc_out[5].split('&')) or len(distribusi[5].split('&')) != len(odc_split[3].split('&')) or len(distribusi[5].split('&')) != len(qrcode_port[1].split('&')):
             update.message.reply_text('Jumlah core pada odp distribusi dan odc output tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
         d_core                  = distribusi[5].split('&')
