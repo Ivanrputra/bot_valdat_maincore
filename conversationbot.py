@@ -47,11 +47,11 @@ ODP-BLB-FBM/12
 DS 3 KAP 12 CORE 6&7
 FBM/D03/13.01
 5 SPL-C KAP 8
-QRCODE ODP
-QRCODE PORT
-ALAMAT
-KELURAHAN
-KECAMATAN
+QRCODE ODP : T3P0DXI5KKFM
+QRCODE PORT : T3P0MUTW56R8 & T3P0FLL5638K
+ALAMAT : PERUMAHAN PLAOSAN PERMAI BLOK  D-69
+KELURAHAN : PANDANWANGI
+KECAMATAN : BELIMBING
 TO
 ODC-BLB-FBM KAP 144
 IN
@@ -60,7 +60,7 @@ TO
 SPL-B 5 PORT 1&2
 TO
 OTB 9 PORT 6&7 CORE 6&7
-FEEDER LOSS
+KET : FEEDER LOSS
 ''')
     return VALDAT_MAINCORE
 
@@ -114,11 +114,11 @@ def valdat_maincore(update, context):
         detail['splitter_name']       = splitter[1]+'.1-01'
         detail['splitter_kap']        = splitter[3]
         #5-9
-        detail['odp_qrcode']          = split_message[4]
-        detail['odp_port']            = split_message[5]
-        detail['odp_address']         = split_message[6]
-        detail['odp_kelurahan']       = split_message[7]
-        detail['odp_kecamatan']       = split_message[8]
+        detail['odp_qrcode']          = split_message[4].split()[1]
+        detail['odp_port']            = split_message[5].split()[1]
+        detail['odp_address']         = split_message[6].split()[1]
+        detail['odp_kelurahan']       = split_message[7].split()[1]
+        detail['odp_kecamatan']       = split_message[8].split()[1]
         #11
         detail['odc_name']            = odc[0]
         detail['odc_kap']             = odc[2]
@@ -137,15 +137,14 @@ def valdat_maincore(update, context):
         detail['out_port']            = odc_out_port[x]
         detail['out_core']            = odc_out_core[x]
         #18
-        detail['description']         = split_message[17]
-
+        detail['description']         = split_message[17].split()[1]
+        # kapasitas in and out panel
         if detail['odc_kap'] == '144':
             detail['in_kap']          = 12
             detail['out_kap']         = 12
         elif detail['odc_kap'] == '288': 
             detail['in_kap']          = 24
             detail['out_kap']         = 24        
-
         # data[x] = detail
         context.user_data[x] = detail
     logger.info(context.user_data)
