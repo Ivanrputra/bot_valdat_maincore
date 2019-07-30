@@ -60,7 +60,7 @@ TO
 SPL-B 5 PORT 1&2
 TO
 OTB 9 PORT 6&7 CORE 6&7
-KET : FEEDER LOSS
+FEEDER LOSS
 ''')
     return VALDAT_MAINCORE
 
@@ -76,21 +76,14 @@ def valdat_maincore(update, context):
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
 
-    #
     distribusi                  = split_message[1].split()
     splitter                    = split_message[3].split()
     odc                         = split_message[10].split()
     odc_in                      = split_message[12].split()
-
-    #
     odc_split                   = split_message[14].split()
-    #
     odc_out                     = split_message[16].split()
 
-    d_core                      = {}
-    odc_out_port                = {}
-    odc_out_core                = {}
-    odc_splt_out                = {}
+    d_core,odc_out_port,odc_out_core,odc_splt_out= {},{},{},{}
 
     if len(distribusi[5]) == 1:
         d_core                  = distribusi[5]
@@ -132,7 +125,7 @@ def valdat_maincore(update, context):
         #13
         detail['in_tray']             = odc_in[1]
         detail['in_port']             = odc_in[3]
-        detail['in_core']             = odc_in[5]
+        detail['in_core']             = '-'#odc_in[5]
         #15
         if len(odc_split[1]) > 1:
             detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
@@ -145,6 +138,13 @@ def valdat_maincore(update, context):
         detail['out_core']            = odc_out_core[x]
         #18
         detail['description']         = split_message[17]
+
+        if detail['odc_kap'] == 144:
+            detail['in_kap']          = 12
+            detail['out_kap']         = 12
+        elif detail['odc_kap'] == 288: 
+            detail['in_kap']          = 24
+            detail['out_kap']         = 12        
 
         # data[x] = detail
         context.user_data[x] = detail
