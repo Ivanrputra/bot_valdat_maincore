@@ -121,8 +121,8 @@ def valdat_maincore(update, context):
         detail['splitter_name']       = splitter[1]+'.1-01'
         detail['splitter_kap']        = splitter[3]
         #5-9
-        detail['odp_qrcode']          = odp_qr[x]#split_message[4].split(':')[1]
-        detail['odp_port']            = split_message[5].split(':')[1]
+        detail['odp_qrcode']          = split_message[4].split(':')[1]
+        detail['odp_port_qrcore']     = odp_qr[x]#split_message[4].split(':')[1]
         detail['odp_address']         = split_message[6].split(':')[1]
         detail['odp_kelurahan']       = split_message[7].split(':')[1]
         detail['odp_kecamatan']       = split_message[8].split(':')[1]
