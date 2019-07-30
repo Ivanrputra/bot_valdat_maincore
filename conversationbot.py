@@ -142,9 +142,9 @@ def valdat_maincore(update, context):
         if detail['odc_kap'] == 144:
             detail['in_kap']          = 12
             detail['out_kap']         = 12
-        elif detail['odc_kap'] == 288: 
+        elif detail['odc_kap'] == 288:
             detail['in_kap']          = 24
-            detail['out_kap']         = 12        
+            detail['out_kap']         = 24
 
         # data[x] = detail
         context.user_data[x] = detail
