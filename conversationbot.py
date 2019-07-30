@@ -62,7 +62,7 @@ TO
 OTB 9 PORT 6&7 CORE 6&7
 KET : FEEDER LOSS
 ''')
-    return VALDAT_MAINCORE
+    return VALDAT_MAINCORE2
 
 
 def valdat_maincore(update, context):
@@ -80,7 +80,7 @@ def valdat_maincore(update, context):
     distribusi                  = split_message[1].split()
     splitter                    = split_message[3].split()
     odc                         = split_message[10].split()
-    odc_in                      = split_message[12].split()
+    odc_in                      = split_message[1].split()
 
     #
     odc_split                   = split_message[14].split()
@@ -114,9 +114,11 @@ def valdat_maincore(update, context):
         detail['distribusi_kap']      = distribusi[3]
         detail['distribusi_core']     = d_core[x]
         detail['odp_index']           = split_message[2] 
+
         detail['splitter_no']         = splitter[0]
-        detail['splitter_name']       = splitter[1]
+        detail['splitter_name']       = splitter[1]+'.1-01'
         detail['splitter_kap']        = splitter[3]
+
         detail['odp_qrcode']          = split_message[4]
         detail['odp_port']            = split_message[5]
         detail['odp_address']         = split_message[6]
@@ -127,7 +129,10 @@ def valdat_maincore(update, context):
         detail['in_tray']             = odc_in[1]
         detail['in_port']             = odc_in[3]
         detail['in_core']             = odc_in[5]
-        detail['splt_name']           = odc_split[0]+'.1-'+odc_split[1]
+        if len() > 1:
+            detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
+        else:
+            detail['splt_name']       = odc_split[0]+'.1-0'+odc_split[1]
         detail['splt_out']            = odc_splt_out[x]
         detail['out_tray']            = odc_out[1]
         detail['out_port']            = odc_out_port[x]
