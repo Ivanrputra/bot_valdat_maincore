@@ -19,7 +19,7 @@ bot.
 """
 
 
-import pymysql.cursors
+import pymysql
 import logging
 
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
@@ -35,9 +35,9 @@ logger = logging.getLogger(__name__)
 MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC = range(4)
 
 def connection():
-    conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
-    cursor = conn.cursor()
-    return cursor
+    # conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
+    conn = pymysql.connect('localhost','root','','daman')
+    return conn
 
 def ValdatMaincoreOdc(update, context):
     user = update.message.from_user
@@ -49,7 +49,7 @@ TO
 SPL-B 5 PORT 1&2
 TO
 OTB 9 PORT 6&7 CORE 6&7
-DS 3
+DS 3 KAP 12 CORE 6&7
 KET : FEEDER LOSS
 ''')
     return MAINCORE_ODC
@@ -67,20 +67,23 @@ def MaincoreOdc(update, context):
     odc_in                      = split_message[2].split()
     odc_split                   = split_message[4].split()
     odc_out                     = split_message[6].split()
-    odc_out_port,odc_out_core,odc_splt_out = {},{},{}
+    distribusi                  = split_message[7].split()
+    odc_out_port,odc_out_core,odc_splt_out,d_core = {},{},{},{}
 
-    if len(odc_split[3].split('&')) == 1 and len(odc_out[3].split('&')) == 1 and len(odc_out[5].split('&')) == 1:
+    if len(odc_split[3].split('&')) == 1 and len(odc_out[3].split('&')) == 1 and len(odc_out[5].split('&')) == 1 and  len(distribusi[5].split('&')) == 1:
         odc_out_port = odc_out[3]
         odc_out_core = odc_out[5]
         odc_splt_out = odc_split[3]
+        d_core       = distribusi[5]
 
-    elif len(odc_split[3].split('&')) >= 1 and len(odc_out[3].split('&')) >= 1 and len(odc_out[5].split('&')) >= 1:
-        if len(odc_split[3].split('&')) != len(odc_out[3].split('&')) or len(odc_split[3].split('&')) != len(odc_out[5].split('&')):
-            update.message.reply_text('Jumlah port splitter dan dengan panel out(port / core) tidak sama, silahkan ulang lagi /start')
+    elif len(odc_split[3].split('&')) >= 1 and len(odc_out[3].split('&')) >= 1 and len(odc_out[5].split('&')) >= 1 and len(distribusi[5].split('&')) >= 1:
+        if len(odc_split[3].split('&')) != len(odc_out[3].split('&')) or len(odc_split[3].split('&')) != len(odc_out[5].split('&')) or len(odc_split[3].split('&')) != len(distribusi[5].split('&')):
+            update.message.reply_text('Jumlah port splitter dan dengan panel out(port / core) atau port distribusi tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
         odc_out_port = odc_out[3].split('&')
         odc_out_core = odc_out[5].split('&')
         odc_splt_out = odc_split[3].split('&')
+        d_core       = distribusi[5].split('&')
     
     for x in range(len(odc_out_port)):
         detail                        = {}
@@ -90,7 +93,7 @@ def MaincoreOdc(update, context):
         #3
         detail['in_tray']             = odc_in[1]
         detail['in_port']             = odc_in[3]
-        detail['in_core']             = '-'#odc_in[5]
+        detail['in_core']             = 0#odc_in[5]
         #5
         if len(odc_split[1]) > 1:
             detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
@@ -102,7 +105,9 @@ def MaincoreOdc(update, context):
         detail['out_port']            = odc_out_port[x]
         detail['out_core']            = odc_out_core[x]
         #8
-        detail['dis_to']              = split_message[7].split()[1]
+        detail['distribusi_ke']       = distribusi[1]
+        detail['distribusi_kap']      = distribusi[3]
+        detail['distribusi_core']     = d_core[x]
         #9
         detail['description']         = split_message[8].split(':')[1]
         # kapasitas in and out panel
@@ -132,33 +137,56 @@ def odc_location(update, context):
                 user_location.longitude)
 
     data    = context.user_data 
-    cursor  = connection()
-    sql     = ''
-    for x in range(len(data)):
-        sql = sql + ',(NULL,"'
-        +data[x]['odc_name']+'",'
-        +int(data[x]['in_tray'])+','
-        +int(data[x]['in_port'])+','
-        +int(data[x]['in_core'])+','
-        +data[x]['in_kap']+','
-        +data[x]['splt_name']+','
-        +data[x]['splt_out']+','
-        +data[x]['out_tray']+','
-        +data[x]['out_port']+','
-        +data[x]['out_core']+','
-        +data[x]['out_kap']+',"'
-        +data[x]['odc_lat']+'","'
-        +data[x]['odc_long']+'",'
-        +data[x]['dis_to']+','
-        +data[x]['odc_kap']+','
-        +data[x]['odc_kap']+',"sto","address",'
-        +data[x]['description']+')'
-        update.message.reply_text(data[x])
-    sql = sql[1:]
-    cursor.excecute("insert into valdat_odc values("+sql+")")
-    update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
+    sql_odc,sql_maincore     = "",""
 
-    cursor.close()
+    for x in range(len(data)):
+        sql_odc = "(NULL,'{}','{}','{}',{},'sto','{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['description']))
+        sql_maincore = sql_maincore + ",(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
+            int(data[x]['in_tray']),
+            int(data[x]['in_port']),
+            int(data[x]['in_core']),
+            int(data[x]['in_kap']),
+            str(data[x]['splt_name']),
+            int(data[x]['splt_out']),
+            int(data[x]['out_tray']),
+            int(data[x]['out_port']),
+            int(data[x]['out_core']),
+            int(data[x]['out_kap']),
+            int(data[x]['distribusi_ke']),
+            int(data[x]['distribusi_kap']),
+            int(data[x]['distribusi_core']),
+            "id_to_odc",
+            'NULL'
+            )
+        # update.message.reply_text(data[x])
+    sql_maincore = sql_maincore[1:]
+    update.message.reply_text(sql_maincore)
+
+    conn    = connection()
+    cursor  = conn.cursor()
+    try:
+        cursor.execute("insert into valdat_odc values"+sql_odc+"")
+        conn.commit()
+    except:
+        print('ODC already exist')
+        # update.message.reply_text('ODC already exist')        
+
+    # try:
+    cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name']+"'"))
+    id_odc = int(cursor.fetchone()[0])
+    print(id_odc)
+    sql_maincore = sql_maincore.replace("id_to_odc",str(id_odc))
+    update.message.reply_text(sql_maincore)
+    print(sql_maincore)
+
+    cursor.execute("insert into valdat_maincore values"+sql_maincore+"")
+    conn.commit()
+    # except:
+    #     print('Data Input Fail')
+    conn.close()
+    # update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
+
+    
     return ConversationHandler.END
 
 def ValdatMaincoreOdp(update, context):
