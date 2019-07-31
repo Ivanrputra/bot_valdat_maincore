@@ -32,16 +32,118 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-BIO,VALDAT_MAINCORE,ODP_LOCATION,ODC_LOCATION = range(4)
+MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC = range(4)
 
 def connection():
     conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
     cursor = conn.cursor()
     return cursor
 
+def ValdatMaincoreOdc(update, context):
+    user = update.message.from_user
+    update.message.reply_text('''
+ODC-BLB-FBM KAP 144
+IN
+OTB 1 PORT 5 CORE 5
+TO
+SPL-B 5 PORT 1&2
+TO
+OTB 9 PORT 6&7 CORE 6&7
+KET : FEEDER LOSS
+''')
+    return MAINCORE_ODC
+
+def MaincoreOdc(update, context):
+    context.user_data.clear()
+    user = update.message.from_user
+    split_message = update.message.text.splitlines()
+
+    if len(split_message) != 8:
+        update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
+        return ConversationHandler.END        
+    #
+    odc                         = split_message[0].split()
+    odc_in                      = split_message[2].split()
+    odc_split                   = split_message[4].split()
+    odc_out                     = split_message[6].split()
+    odc_out_port,odc_out_core,odc_splt_out = {},{},{}
+
+    if len(odc_split[3].split('&')) == 1 and len(odc_out[3].split('&')) == 1 and len(odc_out[5].split('&')) == 1:
+        odc_out_port = odc_out[3]
+        odc_out_core = odc_out[5]
+        odc_splt_out = odc_split[3]
+
+    elif len(odc_split[3].split('&')) >= 1 and len(odc_out[3].split('&')) >= 1 and len(odc_out[5].split('&')) >= 1:
+        if len(odc_split[3].split('&')) != len(odc_out[3].split('&')) or len(odc_split[3].split('&')) != len(odc_out[5].split('&')):
+            update.message.reply_text('Jumlah port splitter dan dengan panel out(port / core) tidak sama, silahkan ulang lagi /start')
+            return ConversationHandler.END
+        odc_out_port = odc_out[3].split('&')
+        odc_out_core = odc_out[5].split('&')
+        odc_splt_out = odc_split[3].split('&')
+    
+    for x in range(len(odc_out_port)):
+        detail                        = {}
+        #1
+        detail['odc_name']            = odc[0]
+        detail['odc_kap']             = odc[2]
+        #3
+        detail['in_tray']             = odc_in[1]
+        detail['in_port']             = odc_in[3]
+        detail['in_core']             = '-'#odc_in[5]
+        #5
+        if len(odc_split[1]) > 1:
+            detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
+        else:
+            detail['splt_name']       = odc_split[0]+'.1-0'+odc_split[1]
+        detail['splt_out']            = odc_splt_out[x]
+        #7
+        detail['out_tray']            = odc_out[1]
+        detail['out_port']            = odc_out_port[x]
+        detail['out_core']            = odc_out_core[x]
+        #8
+        detail['description']         = split_message[7].split(':')[1]
+        # kapasitas in and out panel
+        if detail['odc_kap'] == '144':
+            detail['in_kap']          = 12
+            detail['out_kap']         = 12
+        elif detail['odc_kap'] == '288':
+            detail['in_kap']          = 24
+            detail['out_kap']         = 24
+        
+        context.user_data[x] = detail
+    logger.info(context.user_data)
+    update.message.reply_text('Masukkan koordinat ODP')
+
+    return ODC_LOCATION
+
+def odc_location(update, context):
+    user = update.message.from_user
+    user_location = update.message.location
+    location = {}
+    location['odc_lat']             = user_location.latitude
+    location['odc_long']            = user_location.longitude
+    for x in range(len(context.user_data)):
+        context.user_data[x].update(location)
+    
+    logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
+                user_location.longitude)
+
+    data = context.user_data 
+    for x in range(len(data)):
+        update.message.reply_text(data[x])
+        # update.message.reply_text(data[x]['odp_name']+"\n"+
+        # "DS "+data[x]['distribusi_ke']+" KAP "+data[x]['distribusi_kap']+" CORE "+data[x]['distribusi_core']+"\n")
+        # reply = ""
+        # for key, value in data[x].items(): 
+        #     print(key, ":", value) 
+        #     # reply = reply +""+ key +"       ->  "+value+"\n"
+        # update.message.reply_text(data[x].items())
+    update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
+    cursor.close()
+    return ConversationHandler.END
+
 def ValdatMaincoreOdp(update, context):
     user = update.message.from_user
-    
     update.message.reply_text('''
 ODP-BLB-FBM/12
 DS 3 KAP 12 CORE 6&7
@@ -72,18 +174,15 @@ def MaincoreOdp(update, context):
     qrcode_port                 = split_message[5].split(':')
     d_core,odp_qr= {},{}
 
-    if len(distribusi[5].split('&')) == 1 and len(qrcode_port[3].split('&')) == 1:
+    if len(distribusi[5].split('&')) == 1 and len(qrcode_port[1].split('&')) == 1:
         d_core                  = distribusi[5]
         odp_qr                  = qrcode_port[1]
 
-    elif len(distribusi[5]) >= 1:
-        if len(distribusi[5].split('&')) != len(odc_out[3].split('&')) or len(distribusi[5].split('&')) != len(odc_out[5].split('&')) or len(distribusi[5].split('&')) != len(odc_split[3].split('&')) or len(distribusi[5].split('&')) != len(qrcode_port[1].split('&')):
-            update.message.reply_text('Jumlah core pada odp distribusi dan odc output tidak sama, silahkan ulang lagi /start')
+    elif len(distribusi[5].split('&')) >= 1:
+        if len(distribusi[5].split('&'))  != len(qrcode_port[1].split('&')):
+            update.message.reply_text('Jumlah core pada odp distribusi dan qrcode port tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
         d_core                  = distribusi[5].split('&')
-        odc_out_port            = odc_out[3].split('&')
-        odc_out_core            = odc_out[5].split('&')
-        odc_splt_out            = odc_split[3].split('&')
         odp_qr                  = qrcode_port[1].split('&')
     
     for x in range(len(d_core)):
@@ -111,22 +210,6 @@ def MaincoreOdp(update, context):
         
         context.user_data[x] = detail
     logger.info(context.user_data)
-    update.message.reply_text('Masukkan koordinat ODP')
-
-    return ODP_LOCATION
-
-def odc_location(update, context):
-    user = update.message.from_user
-    user_location = update.message.location
-    location = {}
-    location['odc_lat']             = user_location.latitude
-    location['odc_long']            = user_location.longitude
-    for x in range(len(context.user_data)):
-        context.user_data[x].update(location)
-    
-    logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
-                user_location.longitude)
-
     update.message.reply_text('Masukkan koordinat ODP')
 
     return ODP_LOCATION
@@ -170,7 +253,6 @@ def cancel(update, context):
 
     return ConversationHandler.END
 
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -191,12 +273,22 @@ def main():
         states={
             MAINCORE_ODP: [MessageHandler(Filters.text, MaincoreOdp)],
             ODP_LOCATION: [MessageHandler(Filters.location, odp_location)],
-            # ODC_LOCATION: [MessageHandler(Filters.location, odc_location)],
+        },
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )
+
+    valdat_maincore_odc = ConversationHandler(
+        entry_points=[CommandHandler('valdat_maincore_odc', ValdatMaincoreOdc)],
+
+        states={
+            MAINCORE_ODC: [MessageHandler(Filters.text, MaincoreOdc)],
+            ODC_LOCATION: [MessageHandler(Filters.location, odc_location)],
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
     dp.add_handler(valdat_maincore_odp)
+    dp.add_handler(valdat_maincore_odc)
     # dp.add_handler(CommandHandler("format", format))
 
     # log all errors
@@ -209,7 +301,6 @@ def main():
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
