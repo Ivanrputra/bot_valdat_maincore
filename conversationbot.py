@@ -49,6 +49,7 @@ TO
 SPL-B 5 PORT 1&2
 TO
 OTB 9 PORT 6&7 CORE 6&7
+DS 3
 KET : FEEDER LOSS
 ''')
     return MAINCORE_ODC
@@ -58,7 +59,7 @@ def MaincoreOdc(update, context):
     user = update.message.from_user
     split_message = update.message.text.splitlines()
 
-    if len(split_message) != 8:
+    if len(split_message) != 9:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
     #
@@ -101,7 +102,9 @@ def MaincoreOdc(update, context):
         detail['out_port']            = odc_out_port[x]
         detail['out_core']            = odc_out_core[x]
         #8
-        detail['description']         = split_message[7].split(':')[1]
+        detail['dis_to']              = split_message[7].split()[1]
+        #9
+        detail['description']         = split_message[8].split(':')[1]
         # kapasitas in and out panel
         if detail['odc_kap'] == '144':
             detail['in_kap']          = 12
@@ -128,17 +131,33 @@ def odc_location(update, context):
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
 
-    data = context.user_data 
+    data    = context.user_data 
+    cursor  = connection()
+    sql     = ''
     for x in range(len(data)):
+        sql = sql + ',(NULL,"'
+        +data[x]['odc_name']+'",'
+        +int(data[x]['in_tray'])+','
+        +int(data[x]['in_port'])+','
+        +int(data[x]['in_core'])+','
+        +data[x]['in_kap']+','
+        +data[x]['splt_name']+','
+        +data[x]['splt_out']+','
+        +data[x]['out_tray']+','
+        +data[x]['out_port']+','
+        +data[x]['out_core']+','
+        +data[x]['out_kap']+',"'
+        +data[x]['odc_lat']+'","'
+        +data[x]['odc_long']+'",'
+        +data[x]['dis_to']+','
+        +data[x]['odc_kap']+','
+        +data[x]['odc_kap']+',"sto","address",'
+        +data[x]['description']+')'
         update.message.reply_text(data[x])
-        # update.message.reply_text(data[x]['odp_name']+"\n"+
-        # "DS "+data[x]['distribusi_ke']+" KAP "+data[x]['distribusi_kap']+" CORE "+data[x]['distribusi_core']+"\n")
-        # reply = ""
-        # for key, value in data[x].items(): 
-        #     print(key, ":", value) 
-        #     # reply = reply +""+ key +"       ->  "+value+"\n"
-        # update.message.reply_text(data[x].items())
+    sql = sql[1:]
+    cursor.excecute("insert into valdat_odc values("+sql+")")
     update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
+
     cursor.close()
     return ConversationHandler.END
 
