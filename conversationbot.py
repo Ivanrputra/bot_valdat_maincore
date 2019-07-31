@@ -39,7 +39,7 @@ def connection():
     cursor = conn.cursor()
     return cursor
 
-def start(update, context):
+def ValdatMaincoreOdp(update, context):
     user = update.message.from_user
     
     update.message.reply_text('''
@@ -52,48 +52,28 @@ QRCODE PORT : T3P0MUTW56R8 & T3P0FLL5638K
 ALAMAT : PERUMAHAN PLAOSAN PERMAI BLOK  D-69
 KELURAHAN : PANDANWANGI
 KECAMATAN : BELIMBING
-TO
-ODC-BLB-FBM KAP 144
-IN
-OTB 1 PORT 5 CORE 5
-TO
-SPL-B 5 PORT 1&2
-TO
-OTB 9 PORT 6&7 CORE 6&7
 KET : FEEDER LOSS
 ''')
-    return VALDAT_MAINCORE
+    return MAINCORE_ODP
 
 
-def valdat_maincore(update, context):
-    # data = {}
-    # context.user_data = {}
+def MaincoreOdp(update, context):
     context.user_data.clear()
     user = update.message.from_user
     split_message = update.message.text.splitlines()
 
-    if len(split_message) != 18:
+    if len(split_message) != 10:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
     #
     distribusi                  = split_message[1].split()
     splitter                    = split_message[3].split()
+    #
     qrcode_port                 = split_message[5].split(':')
-    odc                         = split_message[10].split()
-    odc_in                      = split_message[12].split()
-    #
-    odc_split                   = split_message[14].split()
-    #
-    odc_out                     = split_message[16].split()
-    
+    d_core,odp_qr= {},{}
 
-    d_core,odc_out_port,odc_out_core,odc_splt_out,odp_qr= {},{},{},{},{}
-
-    if len(distribusi[5]) == 1 and len(odc_out[3]) == 1 and len(odc_out[5]) and len(odc_split[3]) == 1:
+    if len(distribusi[5].split('&')) == 1 and len(qrcode_port[3].split('&')) == 1:
         d_core                  = distribusi[5]
-        odc_out_port            = odc_out[3]
-        odc_out_core            = odc_out[5]
-        odc_splt_out            = odc_split[3]
         odp_qr                  = qrcode_port[1]
 
     elif len(distribusi[5]) >= 1:
@@ -126,38 +106,14 @@ def valdat_maincore(update, context):
         detail['odp_address']         = split_message[6].split(':')[1]
         detail['odp_kelurahan']       = split_message[7].split(':')[1]
         detail['odp_kecamatan']       = split_message[8].split(':')[1]
-        #11
-        detail['odc_name']            = odc[0]
-        detail['odc_kap']             = odc[2]
-        #13
-        detail['in_tray']             = odc_in[1]
-        detail['in_port']             = odc_in[3]
-        detail['in_core']             = '-'#odc_in[5]
-        #15
-        if len(odc_split[1]) > 1:
-            detail['splt_name']       = odc_split[0]+'.1-'+odc_split[1]
-        else:
-            detail['splt_name']       = odc_split[0]+'.1-0'+odc_split[1]
-        detail['splt_out']            = odc_splt_out[x]
-        #17
-        detail['out_tray']            = odc_out[1]
-        detail['out_port']            = odc_out_port[x]
-        detail['out_core']            = odc_out_core[x]
-        #18
-        detail['description']         = split_message[17].split(':')[1]
-        # kapasitas in and out panel
-        if detail['odc_kap'] == '144':
-            detail['in_kap']          = 12
-            detail['out_kap']         = 12
-        elif detail['odc_kap'] == '288':
-            detail['in_kap']          = 24
-            detail['out_kap']         = 24
-        # data[x] = detail
+        #10
+        detail['description']         = split_message[9].split(':')[1]
+        
         context.user_data[x] = detail
     logger.info(context.user_data)
-    update.message.reply_text('Masukkan koordinat ODC')
+    update.message.reply_text('Masukkan koordinat ODP')
 
-    return ODC_LOCATION
+    return ODP_LOCATION
 
 def odc_location(update, context):
     user = update.message.from_user
@@ -180,7 +136,6 @@ def odp_location(update, context):
     # cursor.execute("insert into `odc` ")
     # res = cursor.fetchone()
 
-    
     user = update.message.from_user
     user_location = update.message.location
 
@@ -230,20 +185,18 @@ def main():
     dp = updater.dispatcher
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
+    valdat_maincore_odp = ConversationHandler(
+        entry_points=[CommandHandler('valdat_maincore_odp', ValdatMaincoreOdp)],
 
         states={
-            VALDAT_MAINCORE: [MessageHandler(Filters.text, valdat_maincore)],
-
-            ODC_LOCATION: [MessageHandler(Filters.location, odc_location)],
+            MAINCORE_ODP: [MessageHandler(Filters.text, MaincoreOdp)],
             ODP_LOCATION: [MessageHandler(Filters.location, odp_location)],
+            # ODC_LOCATION: [MessageHandler(Filters.location, odc_location)],
         },
-
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    dp.add_handler(conv_handler)
+    dp.add_handler(valdat_maincore_odp)
     # dp.add_handler(CommandHandler("format", format))
 
     # log all errors
