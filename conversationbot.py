@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC = range(4)
 
 def connection():
-    # conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
-    conn = pymysql.connect('localhost','root','','daman')
+    conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
+    # conn = pymysql.connect('localhost','root','','daman')
     return conn
 
 def ValdatMaincoreOdc(update, context):
@@ -120,7 +120,7 @@ def MaincoreOdc(update, context):
         
         context.user_data[x] = detail
     logger.info(context.user_data)
-    update.message.reply_text('Masukkan koordinat ODP')
+    update.message.reply_text('Masukkan koordinat ODC')
 
     return ODC_LOCATION
 
@@ -137,11 +137,12 @@ def odc_location(update, context):
                 user_location.longitude)
 
     data    = context.user_data 
-    sql_odc,sql_maincore     = "",""
+    sql_odc     = ""
+    sql_maincore = {}
 
     for x in range(len(data)):
         sql_odc = "(NULL,'{}','{}','{}',{},'sto','{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['description']))
-        sql_maincore = sql_maincore + ",(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
+        sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
             int(data[x]['in_core']),
@@ -159,9 +160,9 @@ def odc_location(update, context):
             'NULL'
             )
         # update.message.reply_text(data[x])
-    sql_maincore = sql_maincore[1:]
-    update.message.reply_text(sql_maincore)
-
+    # sql_maincore = sql_maincore[1:]
+    # update.message.reply_text(sql_maincore)
+# file:///C:/Users/IvanRPutra/Downloads/Telegram Desktop/validasi (2).py
     conn    = connection()
     cursor  = conn.cursor()
     try:
@@ -170,19 +171,23 @@ def odc_location(update, context):
     except:
         print('ODC already exist')
         # update.message.reply_text('ODC already exist')        
-
     # try:
     cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name']+"'"))
     id_odc = int(cursor.fetchone()[0])
-    print(id_odc)
-    sql_maincore = sql_maincore.replace("id_to_odc",str(id_odc))
-    update.message.reply_text(sql_maincore)
-    print(sql_maincore)
-
-    cursor.execute("insert into valdat_maincore values"+sql_maincore+"")
-    conn.commit()
+    for x in range(len(sql_maincore)):
+        sql_maincore[x] = sql_maincore[x].replace("id_to_odc",str(id_odc))
+        cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
+        exiss = int(cursor.fetchone()[0])
+        if exiss<1:
+            # update.message.reply_text(sql_maincore[x])
+            cursor.execute("insert into valdat_maincore values"+sql_maincore[x]+"")
+            conn.commit()
+        else:
+            update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
+            
+    # conn.commit()
     # except:
-    #     print('Data Input Fail')
+        # print('Data Input Fail')
     conn.close()
     # update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
 
@@ -202,6 +207,8 @@ ALAMAT : PERUMAHAN PLAOSAN PERMAI BLOK  D-69
 KELURAHAN : PANDANWANGI
 KECAMATAN : BELIMBING
 KET : FEEDER LOSS
+TO
+ODC-BLB-FBM
 ''')
     return MAINCORE_ODP
 
@@ -211,7 +218,7 @@ def MaincoreOdp(update, context):
     user = update.message.from_user
     split_message = update.message.text.splitlines()
 
-    if len(split_message) != 10:
+    if len(split_message) != 12:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
     #
@@ -254,6 +261,7 @@ def MaincoreOdp(update, context):
         detail['odp_kecamatan']       = split_message[8].split(':')[1]
         #10
         detail['description']         = split_message[9].split(':')[1]
+        detail['odc_name']            = split_message[11]
         
         context.user_data[x] = detail
     logger.info(context.user_data)
@@ -262,10 +270,6 @@ def MaincoreOdp(update, context):
     return ODP_LOCATION
 
 def odp_location(update, context):
-    cursor = connection()
-    # cursor.execute("insert into `odc` ")
-    # res = cursor.fetchone()
-
     user = update.message.from_user
     user_location = update.message.location
 
@@ -279,17 +283,51 @@ def odp_location(update, context):
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
     data = context.user_data 
-    for x in range(len(data)):
-        update.message.reply_text(data[x])
-        # update.message.reply_text(data[x]['odp_name']+"\n"+
-        # "DS "+data[x]['distribusi_ke']+" KAP "+data[x]['distribusi_kap']+" CORE "+data[x]['distribusi_core']+"\n")
-        # reply = ""
-        # for key, value in data[x].items(): 
-        #     print(key, ":", value) 
-        #     # reply = reply +""+ key +"       ->  "+value+"\n"
-        # update.message.reply_text(data[x].items())
-    update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
-    cursor.close()
+    sql_distribusi,sql_odp = "",""
+
+    conn    = connection()
+    cursor  = conn.cursor()
+
+    try:
+        cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name'])+"'")
+        id_odc = int(cursor.fetchone()[0])
+    except:
+        update.message.reply_text('ODC tidak terdaftar, ulangi lagi, /odc /odp')
+        conn.rollback()
+        conn.close()
+        return ConversationHandler.END
+
+    try:
+        cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
+        odp_id=cursor.fetchone()
+        if odp_id is None:
+            sqllll = "insert into valdat_odpmaster values (NULL,'"+str(data[0]['odp_name'])+"','"+str(data[0]['odp_index'])+"',"+data[0]['splitter_no']+",'"+str(data[0]['splitter_name'])+"',"+data[0]['splitter_kap']+",'"+str(data[0]['odp_qrcode'])+"','"+str(data[0]['odp_port_qrcore'])+"','"+str(data[0]['odp_address'])+"','"+str(data[0]['odp_kelurahan'])+"','"+str(data[0]['odp_kecamatan'])+"','"+str(data[0]['odp_lat'])+"','"+str(data[0]['odp_long'])+"','"+str(data[0]['description'])+"',NULL,'asd',"+str(id_odc)+")"    
+            cursor.execute(sqllll)
+            conn.commit()
+            odp_id = cursor.lastrowid
+        else :        
+            odp_id = int(odp_id[0])
+    except:
+        update.message.reply_text('Gagal input ODP ke database, /odc /odp')
+        conn.rollback()
+        conn.close()
+        return ConversationHandler.END        
+    
+    try:
+    #doesnt hancle if maincore doessnt exist
+        for x in range(len(data)):
+            sqllll = "update valdat_maincore as m inner join valdat_odc as o on m.odc_id = o.id "+"set m.odp_id = "+str(odp_id)+" where "+"o.name = '"+str(data[x]['odc_name'])+"' " +" and m.distribution_to   = "+str(data[x]['distribusi_ke'])+"" +" and m.distribution_cap  = "+str(data[x]['distribusi_kap'])+"" +" and m.distribution_core = "+str(data[x]['distribusi_core']+" and m.odp_id != NULL")
+            cursor.execute(sqllll)
+        conn.commit()
+        update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
+    except:
+        update.message.reply_text('Gagal Update Maincore ulangi lagi, /odc /odp')
+        conn.rollback()
+        conn.close()
+        return ConversationHandler.END        
+
+
+    conn.close()
     return ConversationHandler.END
 
 def cancel(update, context):
@@ -315,7 +353,7 @@ def main():
 
     # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     valdat_maincore_odp = ConversationHandler(
-        entry_points=[CommandHandler('valdat_maincore_odp', ValdatMaincoreOdp)],
+        entry_points=[CommandHandler('odp', ValdatMaincoreOdp)],
 
         states={
             MAINCORE_ODP: [MessageHandler(Filters.text, MaincoreOdp)],
@@ -325,7 +363,7 @@ def main():
     )
 
     valdat_maincore_odc = ConversationHandler(
-        entry_points=[CommandHandler('valdat_maincore_odc', ValdatMaincoreOdc)],
+        entry_points=[CommandHandler('odc', ValdatMaincoreOdc)],
 
         states={
             MAINCORE_ODC: [MessageHandler(Filters.text, MaincoreOdc)],
