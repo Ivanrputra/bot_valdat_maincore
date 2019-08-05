@@ -297,21 +297,21 @@ def odp_location(update, context):
         conn.close()
         return ConversationHandler.END
 
-    try:
-        cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
-        odp_id=cursor.fetchone()
-        if odp_id is None:
-            sqllll = "insert into valdat_odpmaster values (NULL,'"+str(data[0]['odp_name'])+"','"+str(data[0]['odp_index'])+"',"+data[0]['splitter_no']+",'"+str(data[0]['splitter_name'])+"',"+data[0]['splitter_kap']+",'"+str(data[0]['odp_qrcode'])+"','"+str(data[0]['odp_port_qrcore'])+"','"+str(data[0]['odp_address'])+"','"+str(data[0]['odp_kelurahan'])+"','"+str(data[0]['odp_kecamatan'])+"','"+str(data[0]['odp_lat'])+"','"+str(data[0]['odp_long'])+"','"+str(data[0]['description'])+"',NULL,'asd',"+str(id_odc)+")"    
-            cursor.execute(sqllll)
-            conn.commit()
-            odp_id = cursor.lastrowid
-        else :        
-            odp_id = int(odp_id[0])
-    except:
-        update.message.reply_text('Gagal input ODP ke database, /odc /odp')
-        conn.rollback()
-        conn.close()
-        return ConversationHandler.END        
+    # try:
+    cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
+    odp_id=cursor.fetchone()
+    if odp_id is None:
+        sqllll = "insert into valdat_odpmaster values (NULL,'"+str(data[0]['odp_name'])+"','"+str(data[0]['odp_index'])+"',"+data[0]['splitter_no']+",'"+str(data[0]['splitter_name'])+"',"+data[0]['splitter_kap']+",'"+str(data[0]['odp_qrcode'])+"','"+str(data[0]['odp_port_qrcore'])+"','"+str(data[0]['odp_address'])+"','"+str(data[0]['odp_kelurahan'])+"','"+str(data[0]['odp_kecamatan'])+"','"+str(data[0]['odp_lat'])+"','"+str(data[0]['odp_long'])+"','"+str(data[0]['description'])+"',NULL,'asd',"+str(id_odc)+")"    
+        cursor.execute(sqllll)
+        conn.commit()
+        odp_id = cursor.lastrowid
+    else :        
+        odp_id = int(odp_id[0])
+    # except:
+    update.message.reply_text('Gagal input ODP ke database, /odc /odp')
+    conn.rollback()
+    conn.close()
+    return ConversationHandler.END        
     
     try:
     #doesnt hancle if maincore doessnt exist
