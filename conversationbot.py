@@ -51,6 +51,8 @@ TO
 OTB 9 PORT 6&7 CORE 6&7
 DS 3 KAP 12 CORE 6&7
 KET : FEEDER LOSS
+STO BLB
+KAP_DIS 12
 ''')
     return MAINCORE_ODC
 
@@ -59,7 +61,7 @@ def MaincoreOdc(update, context):
     user = update.message.from_user
     split_message = update.message.text.splitlines()
 
-    if len(split_message) != 9:
+    if len(split_message) != 11:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
     #
@@ -110,6 +112,10 @@ def MaincoreOdc(update, context):
         detail['distribusi_core']     = d_core[x]
         #9
         detail['description']         = split_message[8].split(':')[1]
+        #10
+        detail['sto']                 = split_message[9].split()[1]
+        #11
+        detail['cap_dis']             = split_message[10].split()[1]
         # kapasitas in and out panel
         if detail['odc_kap'] == '144':
             detail['in_kap']          = 12
@@ -117,6 +123,7 @@ def MaincoreOdc(update, context):
         elif detail['odc_kap'] == '288':
             detail['in_kap']          = 24
             detail['out_kap']         = 24
+
         
         context.user_data[x] = detail
     logger.info(context.user_data)
@@ -141,7 +148,7 @@ def odc_location(update, context):
     sql_maincore = {}
 
     for x in range(len(data)):
-        sql_odc = "(NULL,'{}','{}','{}',{},'sto','{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['description']))
+        sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
         sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
@@ -167,27 +174,33 @@ def odc_location(update, context):
     cursor  = conn.cursor()
     try:
         cursor.execute("insert into valdat_odc values"+sql_odc+"")
+        update.message.reply_text('ODC baru telah terdaftar')
         conn.commit()
     except:
-        print('ODC already exist')
+        update.message.reply_text('ODC terdaftar')
+        conn.rollback()
+        conn.close()
         # update.message.reply_text('ODC already exist')        
-    # try:
-    cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name']+"'"))
-    id_odc = int(cursor.fetchone()[0])
-    for x in range(len(sql_maincore)):
-        sql_maincore[x] = sql_maincore[x].replace("id_to_odc",str(id_odc))
-        cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
-        exiss = int(cursor.fetchone()[0])
-        if exiss<1:
-            # update.message.reply_text(sql_maincore[x])
-            cursor.execute("insert into valdat_maincore values"+sql_maincore[x]+"")
-            conn.commit()
-        else:
-            update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
-            
+    try:
+        cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name']+"'"))
+        id_odc = int(cursor.fetchone()[0])
+        for x in range(len(sql_maincore)):
+            sql_maincore[x] = sql_maincore[x].replace("id_to_odc",str(id_odc))
+            cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
+            exiss = int(cursor.fetchone()[0])
+            if exiss<1:
+                # update.message.reply_text(sql_maincore[x])
+                cursor.execute("insert into valdat_maincore values"+sql_maincore[x]+"")
+                conn.commit()
+            else:
+                update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
+                
     # conn.commit()
-    # except:
-        # print('Data Input Fail')
+    except:
+        update.message.reply_text("Gagal input data  odc , ulangi lagi /odc")
+        conn.rollback()
+        conn.close()
+
     conn.close()
     # update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
 
@@ -316,7 +329,7 @@ def odp_location(update, context):
     try:
     #doesnt hancle if maincore doessnt exist
         for x in range(len(data)):
-            sqllll = "update valdat_maincore as m inner join valdat_odc as o on m.odc_id = o.id "+"set m.odp_id = "+str(odp_id)+" where "+"o.name = '"+str(data[x]['odc_name'])+"' " +" and m.distribution_to   = "+str(data[x]['distribusi_ke'])+"" +" and m.distribution_cap  = "+str(data[x]['distribusi_kap'])+"" +" and m.distribution_core = "+str(data[x]['distribusi_core']+" and m.odp_id != NULL")
+            sqllll = "update valdat_maincore as m inner join valdat_odc as o on m.odc_id = o.id "+"set m.odp_id = "+str(odp_id)+" where "+"o.name = '"+str(data[x]['odc_name'])+"' " +" and m.distribution_to   = "+str(data[x]['distribusi_ke'])+"" +" and m.distribution_cap  = "+str(data[x]['distribusi_kap'])+"" +" and m.distribution_core = "+str(data[x]['distribusi_core']+"")
             cursor.execute(sqllll)
         conn.commit()
         update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
