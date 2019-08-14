@@ -21,6 +21,10 @@ bot.
 
 import pymysql
 import logging
+#bot validasi hendra
+import validasi
+#bot validasi TELKOM UNIVERSITY
+import psb_sales
 
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
@@ -169,7 +173,6 @@ def odc_location(update, context):
         # update.message.reply_text(data[x])
     # sql_maincore = sql_maincore[1:]
     # update.message.reply_text(sql_maincore)
-# file:///C:/Users/IvanRPutra/Downloads/Telegram Desktop/validasi (2).py
     conn    = connection()
     cursor  = conn.cursor()
     try:
@@ -387,8 +390,9 @@ def main():
 
     dp.add_handler(valdat_maincore_odp)
     dp.add_handler(valdat_maincore_odc)
-    # dp.add_handler(CommandHandler("format", format))
-
+    dp.add_handler(validasi.main())
+    dp.add_handler(psb_sales.main())
+    
     # log all errors
     dp.add_error_handler(error)
 
