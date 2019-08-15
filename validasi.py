@@ -278,11 +278,6 @@ def dataodp(update, context):
         update.message.reply_text("ADA QR CODE YANG TIDAK DITEMUKAN. ULANGI",reply_markup=ReplyKeyboardRemove())
         return DATAODP
 
-
-   
-    
-
-
 def gender(update, context):
     user = update.message.from_user
     logger.info("Gender of %s: %s", user.first_name, update.message.text)
@@ -291,7 +286,6 @@ def gender(update, context):
                               reply_markup=ReplyKeyboardRemove())
 
     return PHOTO
-
 
 def photo(update, context):
     user = update.message.from_user

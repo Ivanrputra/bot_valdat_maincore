@@ -98,18 +98,6 @@ def cek_sc(update, context):
     reply_keyboard = [['IYA', 'TIDAK']]
     context.user_data['data'] = {}
     text = update.message.text
-    # psb_sales_conn.connect()
-    # # print(" SELECT * FROM valdat_psb where sc = '" + text + "' ")
-    # cursor = psb_sales_conn.query(" SELECT * FROM valdat_psb where sc = '"+text+"' ")
-    # records = cursor.fetchall()
-    # psb_sales_conn.comit()
-    #
-    # if cursor.rowcount > 0:
-    #     update.message.reply_text('Nomor SC sudah pernah diinput, Masukkan Nomor SC lain :',
-    #                               reply_markup=ReplyKeyboardRemove())
-    #     return CEK_SC
-
-
     data_ = str(get_sc(text).text)
     json_ = json.loads(data_)
     # print(data_)
@@ -172,6 +160,7 @@ def odp_real(update, context):
         update.message.reply_text("Format odp salah silahkan masukkan lagi \nFormat ODP yang benar (ODP-TUR-FA/01) \nJika No label ditulis NO LABEL "
                                   "\nJika tanpa tutup ditulis TANPA TUTUP", reply_markup=ReplyKeyboardRemove())
         return ODP_REAL
+
 def port(update, context):
     # global data, regex_port
     user = update.message.from_user
@@ -235,38 +224,6 @@ def tag_pelanggan(update, context):
     user_location = update.message.location
     location = str(user_location.latitude) + ", " + str(user_location.longitude)
     context.user_data['data']['TAG PELANGGAN'] = location
-    psb_sales_conn.connect()
-    sql = (" insert into valdat_psb (ps_date,report_date,assigned_hd_date,sc,telegram_chat_id,telegram_username,no_voice,no_internet,sid,customer_name,customer_address,datel,sto,odp_wo,odp_real,odp_port,dc_length,qrcode_dropcore,sn_ont,sn_stb,odp_coordinate,customer_coordinate,status,status_dava,message_id)"+
-        "values ('"+str(date.today())+"','"+str(date.today())+"','"+str(date.today())+"','"+
-        context.user_data['data']['No. SC']+"',NULL,NULL,'"+
-        context.user_data['data']['No TELP']+"','"+
-        context.user_data['data']['No INET']+"',NULL,'"+
-        context.user_data['data']['PELANGGAN']+"','"+
-        context.user_data['data']['ALAMAT']+"',NULL,'"+
-        context.user_data['data']['STO']+"','"+
-        context.user_data['data']['ODP WO']+"','"+
-        context.user_data['data']['ODP REAL']+"','"+
-        context.user_data['data']['PORT']+"','"+
-        context.user_data['data']['DC']+"','"+
-        context.user_data['data']['QR CODE']+"','"+
-        context.user_data['data']['SN ONT']+"','"+
-        context.user_data['data']['SN STB']+"','"+
-        context.user_data['data']['TAG ODP']+"','"+
-        context.user_data['data']['TAG PELANGGAN']+"',NULL,NULL,NULL) ")    
-    # INSERT    
-    # INTO
-    # `valdat_psb`(`id`, `assigned_hd_date`, `sc`, `telegram_chat_id`, `telegram_username`, `no_voice`, `no_internet`,
-    #              `sid`, `customer_name`, `customer_address`, `datel`, `sto`, `odp_wo`, `odp_real`, `odp_port`,
-    #              `dc_length`, `qrcode_dropcore`, `sn_ont`, `sn_stb`, `odp_coordinate`, `customer_coordinate`,
-    #              `report_date`, `ps_date`, `status`, `status_dava`, `message_id`)
-    # VALUES(NULL, NULL, '20722291', NULL, NULL, '087785216507', '121112233278', NULL, 'Muhar Denny fadhila',
-    #        'SUKAPURA 011, SUKAPURA, JAKARTA UTARA.', NULL, 'CWA', 'ODP-JTN-FDW/059', 'ODP-SGS-FA/08', '100', '200',
-    #        'TP1082312', '2384234', '24389732', '-1.898568, 118.124999', '-1.898568, 118.124999', NULL, NULL, NULL, NULL,
-    #        NULL);
-    print (sql)
-    cursor = psb_sales_conn.query(sql)
-    psb_sales_conn.comit()
-
     update.message.reply_text("Masukkan foto rumah pelanggan :", reply_markup=ReplyKeyboardRemove())
     return RUMAH_PELANGGAN
 
@@ -328,18 +285,48 @@ def foto_odp(update, context):
     photo_file.download(path)
     context.user_data['data']['FOTO ODP'] = path
 
-    # sql = " insert into psb (id_psb,nomor_sc,no_inet,no_telp,nama,alamat,sto,odp_wo," \
-    #       "odp_real,port,dc,qr_code,sn_ont,sn_stb,tag_odp,tag_pelanggan,rumah_pelanggan,petugas_pelanggan," \
-    #       "petugas_layanan,hasil_redaman,perangkat_ontstb,foto_odp) values ('978878'," \
-    #       "'"+data['No. SC']+"','"+data['No INET']+"','"+data['No TELP']+"','"+data['PELANGGAN']+"','"+data['ALAMAT']+"','"+data['STO']+"','"+data['ODP WO']+"','"+data['ODP REAL']+"','"+data['PORT']+"','"+data['DC']+"','"+data['QR CODE']+"','"+data['SN ONT']+"','"+data['SN STB']+"','"+data['TAG ODP']+"','"+data['TAG PELANGGAN']+"','"+data['FOTO RUMAH PELANGGAN']+"','"+data['FOTO PETUGAS & PELANGGAN']+"','"+data['FOTO PETUGAS & LAYANAN']+"','"+data['FOTO HASIL REDAMAN']+"','"+data['FOTO ONT & STB']+"','"+data['FOTO ODP']+"') "
-    # print (sql)
+    # insert to valdat_psb
+    psb_sales_conn.connect()
+    sql = (" insert into valdat_psb (ps_date,report_date,assigned_hd_date,sc,telegram_chat_id,telegram_username,no_voice,no_internet,sid,customer_name,customer_address,datel,sto,odp_wo,odp_real,odp_port,dc_length,qrcode_dropcore,sn_ont,sn_stb,odp_coordinate,customer_coordinate,status,status_dava,message_id)"+
+        "values ('"+str(date.today())+"','"+str(date.today())+"','"+str(date.today())+"','"+
+        context.user_data['data']['No. SC']+"',NULL,NULL,'"+
+        context.user_data['data']['No TELP']+"','"+
+        context.user_data['data']['No INET']+"',NULL,'"+
+        context.user_data['data']['PELANGGAN']+"','"+
+        context.user_data['data']['ALAMAT']+"',NULL,'"+
+        context.user_data['data']['STO']+"','"+
+        context.user_data['data']['ODP WO']+"','"+
+        context.user_data['data']['ODP REAL']+"','"+
+        context.user_data['data']['PORT']+"','"+
+        context.user_data['data']['DC']+"','"+
+        context.user_data['data']['QR CODE']+"','"+
+        context.user_data['data']['SN ONT']+"','"+
+        context.user_data['data']['SN STB']+"','"+
+        context.user_data['data']['TAG ODP']+"','"+
+        context.user_data['data']['TAG PELANGGAN']+"',NULL,NULL,NULL) ")    
+    print (sql)
+    cursor = psb_sales_conn.query(sql)
+    psb_sales_conn.comit()
+    # insert to valdat_psb
 
-    context.user_data['data']['FOTO RUMAH PELANGGAN'] = " ✔️ "
-    context.user_data['data']['FOTO PETUGAS & PELANGGAN'] = " ✔️ "
-    context.user_data['data']['FOTO PETUGAS & LAYANAN'] = " ✔️ "
-    context.user_data['data']['FOTO HASIL REDAMAN'] = " ✔️ "
-    context.user_data['data']['FOTO ONT & STB'] = " ✔️ "
-    context.user_data['data']['FOTO ODP'] = " ✔️ "
+    media = []
+    media.append(context.user_data['data']['FOTO RUMAH PELANGGAN'])
+    media.append(context.user_data['data']['FOTO PETUGAS & PELANGGAN'])
+    media.append(context.user_data['data']['FOTO PETUGAS & LAYANAN'])
+    media.append(context.user_data['data']['FOTO HASIL REDAMAN'])
+    media.append(context.user_data['data']['FOTO ONT & STB'])
+    media.append(context.user_data['data']['FOTO ODP'])
+
+    psb_id = cursor.lastrowid
+    for x in media:
+        sql = (" insert into valdat_evidence (url,category_id,psb_id) values ('"+
+            str(x)+"',"+
+            str(1)+","+
+            str(psb_id)+") ")
+        print(sql)
+        cursor = psb_sales_conn.query(sql)
+    psb_sales_conn.comit()
+
 
     update.message.reply_text("Data \n" "{}".format(list_data(context.user_data['data'])))
     update.message.reply_text("Terimakasih Data Telah Tersimpan", reply_markup=ReplyKeyboardRemove())
@@ -347,8 +334,6 @@ def foto_odp(update, context):
     #save kombinasi
     list_im1 = ([context.user_data['pathmedia']+'/psb_{}_rumah_pelanggan.jpg'.format(context.user_data['data']['No. SC']),context.user_data['pathmedia']+'/psb_{}_petugas-dengan-pelanggan.jpg'.format(context.user_data['data']['No. SC']), context.user_data['pathmedia']+'/psb_{}_petugas-dengan-layanan.jpg'.format(context.user_data['data']['No. SC'])])
     list_im2 = ([context.user_data['pathmedia']+'/psb_{}_rumah_pelanggan.jpg'.format(context.user_data['data']['No. SC']),context.user_data['pathmedia']+'/psb_{}_petugas-dengan-pelanggan.jpg'.format(context.user_data['data']['No. SC']), context.user_data['pathmedia']+'/psb_{}_petugas-dengan-layanan.jpg'.format(context.user_data['data']['No. SC'])])
-
-   # list_im2 = ([pathmedia+'/psb_{}_rumah_pelanggan.jpg'.format(data['No. SC']),pathmedia+'/psb_{}_.jpg'.format(data['No. SC']),pathmedia+'/psb_{}_rumah_pelanggan.jpg'.format(data['No. SC'])])
 
     imgs1 = [Image.open(i) for i in list_im1]
 
@@ -366,8 +351,6 @@ def foto_odp(update, context):
     imgs_comb = np.vstack((np.asarray(i) for i in imgs))
     imgs_comb = Image.fromarray(imgs_comb)
     imgs_comb.save(context.user_data['pathmedia']+'/psb_{}_kombinasi.jpg'.format(context.user_data['data']['No. SC']),'JPEG')
-    #imgs_comb.save('psb__kombinasi.jpg','JPEG')
-    #imgs_comb.save('psb__kombinasi.jpg')
     return ConversationHandler.END
 
 def get_myir(myir):
@@ -377,7 +360,6 @@ def get_myir(myir):
     payload = 'guid=myindihome#2017&code=&data={"trackId":"%s"}' % myir
 
     return requests.post(url, data=payload, headers=headers)
-
 
 def check_myir(update, context):
     # global data
@@ -406,7 +388,6 @@ def check_myir(update, context):
     update.message.reply_text("Apakah data ini benar ?",reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
     return CONFIRM_SALES
-
 
 def confirm_sales(update, context):
     reply_keyboard = [['INPUT_DATA']]
@@ -456,37 +437,23 @@ def sales_lokasi_pelanggan(update, context):
     print(sql)
     cursor = psb_sales_conn.query(sql)
     psb_sales_conn.comit()
+
+    #pandaiman
+    sales_id = cursor.lastrowid
+    sql = (" insert into valdat_evidence (url,category_id,sales_id) values ('"+
+        context.user_data['data']['FOTO RUMAH PELANGGAN']+"',"+
+        str(1)+","+
+        str(sales_id)+") ")
+    print(sql)
+    cursor = psb_sales_conn.query(sql)
+    psb_sales_conn.comit()
+    #pandaiman
+
     context.user_data['data']['FOTO RUMAH PELANGGAN'] = " ✔️ "
     update.message.reply_text("Data \n" "{}".format(list_data(context.user_data['data'])))
     update.message.reply_text("Terimakasih Data Telah Tersimpan", reply_markup=ReplyKeyboardRemove())
 
-   #  list_im1 = ([context.user_data['pathmedia']+'/psb_{}_rumah_pelanggan.jpg'.format(context.user_data['data']['NO SC']),context.user_data['pathmedia']+'/psb_{}_petugas-dengan-pelanggan.jpg'.format(context.user_data['data']['NO SC']), context.user_data['pathmedia']+'/psb_{}_petugas-dengan-layanan.jpg'.format(context.user_data['data']['NO SC'])])
-   #  list_im2 = ([context.user_data['pathmedia']+'/psb_{}_hasil-redaman.jpg'.format(context.user_data['data']['NO SC']),context.user_data['pathmedia']+'/psb_{}_perangkat-ontstb.jpg'.format(context.user_data['data']['NO SC']), context.user_data['pathmedia']+'/psb_{}_foto-odp.jpg'.format(context.user_data['data']['NO SC'])])
-
-   # # list_im2 = ([pathmedia+'/psb_{}_rumah_pelanggan.jpg'.format(data['No. SC']),pathmedia+'/psb_{}_.jpg'.format(data['No. SC']),pathmedia+'/psb_{}_rumah_pelanggan.jpg'.format(data['No. SC'])])
-
-   #  imgs1 = [Image.open(i) for i in list_im1]
-
-   #  imgs2 = [Image.open(i) for i in list_im2]
-
-   #  # pick the image which is the smallest, and resize the others to match it (can be arbitrary image shape here)
-   #  min_shape = sorted([(np.sum(i.size), i.size) for i in imgs1])[0][1]
-
-   #  imgs_comb1 = np.hstack((np.asarray(i.resize(min_shape)) for i in imgs1))
-   #  imgs_comb2 = np.hstack((np.asarray(i.resize(min_shape)) for i in imgs2))
-
-
-   #  imgs = ([imgs_comb1,imgs_comb2])
-   #  # for a vertical stacking it is simple: use vstack
-   #  imgs_comb = np.vstack((np.asarray(i) for i in imgs))
-   #  imgs_comb = Image.fromarray(imgs_comb)
-   #  #imgs_comb.save(pathmedia+'/psb_{}_kombinasi.jpg'.format(data['No. SC']),'JPEG')
-   #  imgs_comb.save('psb__kombinasi.jpg','JPEG')
-   #  imgs_comb.save('psb__kombinasi.jpg')
-
-
     return ConversationHandler.END
-
 
 def cancel(update, context):
     user = update.message.from_user
@@ -496,14 +463,9 @@ def cancel(update, context):
 
     return ConversationHandler.END
 
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-
-
-
-
 
 def main():
     conv_handler = ConversationHandler(
@@ -525,8 +487,6 @@ def main():
             HASIL_REDAMAN: [MessageHandler(Filters.photo, foto_redaman)],
             PERANGKAT_ONTSTB: [MessageHandler(Filters.photo, foto_ontstb)],
             FOTO_ODP: [MessageHandler(Filters.photo, foto_odp)],
-            # LOCATION: [MessageHandler(Filters.location, location),
-            #            CommandHandler('skip', skip_location)]
             INPUT: [RegexHandler('^(INPUT_DATA)$', input)],
             CEK_SC: [MessageHandler(Filters.text, cek_sc)],
             CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
