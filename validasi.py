@@ -383,12 +383,13 @@ def photo5(update, context):
 
     cursor.execute("insert INTO valdat_odpmaster (name, redaman, qrcode_odp, qrcode_port, lat, long, cap) VALUES ('"+str(datasimpan[0])+"','"+str(datasimpan[2])+"','"+str(datasimpan[3])+"','"+str(datasimpan[4])+"','"+str(context.user_data['lat'])+"','"+str(context.user_data['long'])+"','"+str(datasimpan[1])+"')")
     db.commit()
-    cursor.execute("select id from `valdat_odpmaster` where `name` = '"+datasimpan[0]+"' order by `id` desc limit 1")
-    idodp = cursor.fetchone()
-    print (idodp[0])
+    idodp = cursor.lastrowid
+    # cursor.execute("select id from `valdat_odpmaster` where `name` = '"+datasimpan[0]+"' order by `id` desc limit 1")
+    # idodp = cursor.fetchone()
+    # print (idodp[0])
     a=0
     for x in range(int(datasimpan[1])):
-        cursor.execute("insert INTO valdat_validasi (odp_port, qrcode_dropcore, odp_id) VALUES ('"+str(datasimpan[a+5])+"', '"+datasimpan[a+5]+"', '"+str(idodp[0])+"')")
+        cursor.execute("insert INTO valdat_validasi (odp_port, qrcode_dropcore, odp_id) VALUES ('"+str(datasimpan[a+5])+"', '"+datasimpan[a+5]+"', '"+str(idodp)+"')")
         db.commit()
         a+=1
 
@@ -426,15 +427,6 @@ def error(update, context):
 
 
 def main():
-    # Create the Updater and pass it your bot's token.
-    # Make sure to set use_context=True to use the new context based callbacks
-    # Post version 12 this will no longer be necessary
-    # updater = Updater("922566249:AAEkob4CL2Wh7SFtc399oyM5sKImiBOGugU", use_context=True)
-
-    # Get the dispatcher to register handlers
-    # dp = updater.dispatcher
-
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('valdat_odp', start)],
 
@@ -472,19 +464,3 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
     return conv_handler
-    # dp.add_handler(conv_handler)
-
-    # log all errors
-    # dp.add_error_handler(error)
-
-    # Start the Bot
-    # updater.start_polling()
-
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
-    # updater.idle()
-
-
-# if __name__ == '__main__':
-#     main()
