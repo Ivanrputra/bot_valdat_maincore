@@ -32,8 +32,8 @@ import os
 
 ############### CONFIGURE THIS ###################
 # Open database connection
-db = pymysql.connect("localhost","root","","valdat_test")
-# db = pymysql.connect("10.112.82.94","ikrom","akuadmindb","valdat_test")
+# db = pymysql.connect("localhost","root","","valdat_test")
+db = pymysql.connect("10.112.82.94","ikrom","akuadmindb","valdat_test")
 
 ##################################################
 

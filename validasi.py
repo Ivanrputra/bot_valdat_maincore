@@ -369,8 +369,7 @@ def photo5(update, context):
     photo_file = update.message.photo[-1].get_file()
     photo_file.download(context.user_data['path']+'/odp_redaman.jpg')
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Foto Redaman ODP Berhasil Disimpan.\nSemua Laporan Telah Diterima.\nTerima kasih.')
-    
+   
     datasimpan = []
     dataket = []
     y=0
@@ -379,21 +378,26 @@ def photo5(update, context):
         datasimpan.append(datafinal[1])
         dataket.append(datafinal[0])
         y+=1
-        
-
-    cursor.execute("insert INTO valdat_odpmaster (name, redaman, qrcode_odp, qrcode_port, lat, long, cap) VALUES ('"+str(datasimpan[0])+"','"+str(datasimpan[2])+"','"+str(datasimpan[3])+"','"+str(datasimpan[4])+"','"+str(context.user_data['lat'])+"','"+str(context.user_data['long'])+"','"+str(datasimpan[1])+"')")
-    db.commit()
-    idodp = cursor.lastrowid
-    # cursor.execute("select id from `valdat_odpmaster` where `name` = '"+datasimpan[0]+"' order by `id` desc limit 1")
-    # idodp = cursor.fetchone()
-    # print (idodp[0])
-    a=0
-    for x in range(int(datasimpan[1])):
-        cursor.execute("insert INTO valdat_validasi (odp_port, qrcode_dropcore, odp_id) VALUES ('"+str(datasimpan[a+5])+"', '"+datasimpan[a+5]+"', '"+str(idodp)+"')")
+    sql = "insert into valdat_odpmaster (name,redaman,qrcode_odp,qrcode_port,lat,longitude,cap) values ('"+str(datasimpan[0])+"','"+str(datasimpan[2])+"','"+str(datasimpan[3])+"','"+str(datasimpan[4])+"','"+str(context.user_data['lat'])+"','"+str(context.user_data['long'])+"','"+datasimpan[1]+"')"
+    print(sql)
+    try:
+        cursor.execute(sql)
         db.commit()
-        a+=1
-
-
+        idodp = cursor.lastrowid
+        # cursor.execute("select id from `valdat_odpmaster` where `name` = '"+datasimpan[0]+"' order by `id` desc limit 1")
+        # idodp = cursor.fetchone()
+        # print (idodp[0])
+        a=0
+        for x in range(int(datasimpan[1])):
+            cursor.execute("insert into valdat_validasi (odp_port, qrcode_dropcore, odp_id) VALUES ('"+str(datasimpan[a+5])+"', '"+datasimpan[a+5]+"', '"+str(idodp)+"')")
+            db.commit()
+            a+=1
+        update.message.reply_text('Foto Redaman ODP Berhasil Disimpan.\nSemua Laporan Telah Diterima.\nTerima kasih.')
+    except:
+        db.rollback()
+        update.message.reply_text('Foto Redaman ODP Berhasil Disimpan.\nSemua Laporan Telah Diterima.\nTerima kasih.')
+        
+    
     return ConversationHandler.END
 
 def skip_location(update, context):
