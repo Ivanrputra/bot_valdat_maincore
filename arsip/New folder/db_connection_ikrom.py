@@ -12,11 +12,7 @@ def connect():
                                              database='valdat_test',
                                              user='ikrom',
                                              password='akuadmindb')
-        # connection = mysql.connector.connect(host='localhost',
-        #                                      database='daman',
-        #                                      user='root',
-        #                                      password='')
-# 'localhost','root','','daman'
+
         # connection = mysql.connector.connect(host='localhost',
         #                                      database='db_bot',
         #                                      user='root',

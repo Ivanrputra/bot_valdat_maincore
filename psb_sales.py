@@ -287,7 +287,7 @@ def foto_odp(update, context):
 
     # insert to valdat_psb
     psb_sales_conn.connect()
-    sql = (" insert into valdat_psb (ps_date,report_date,assigned_hd_date,sc,telegram_chat_id,telegram_username,no_voice,no_internet,sid,customer_name,customer_address,datel,sto,odp_wo,odp_real,odp_port,dc_length,qrcode_dropcore,sn_ont,sn_stb,odp_coordinate,customer_coordinate,status,status_dava,message_id)"+
+    sql = ("insert into valdat_psb (ps_date,report_date,assigned_hd_date,sc,telegram_chat_id,telegram_username,no_voice,no_internet,sid,customer_name,customer_address,datel,sto,odp_wo,odp_real,odp_port,dc_length,qrcode_dropcore,sn_ont,sn_stb,odp_coordinate,customer_coordinate,status,status_dava,message_id)"+
         "values ('"+str(date.today())+"','"+str(date.today())+"','"+str(date.today())+"','"+
         context.user_data['data']['No. SC']+"',NULL,NULL,'"+
         context.user_data['data']['No TELP']+"','"+

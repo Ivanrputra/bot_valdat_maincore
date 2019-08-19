@@ -2,7 +2,7 @@ import logging
 import requests
 import json
 import os
-import psb_sales_conn
+import db_connection_ikrom
 
 import sys
 import PIL
@@ -231,8 +231,8 @@ def port_expand(update, context):
 	data['PORT_EXPAND'] = update.message.text
 	sql = " insert into valdat_expand values (NULL,NULL,NULL,'"+data['CEK_STO']+"','"+data['ODP_REAL']+"','"+data['No. SC']+"','"+data['IN_NUMBER']+"','"+data['OLD_CAPACITY']+"','"+data['NEW_CAPACITY']+"','"+data['ODP_COORDINATE']+"',1,1,'"+data['QRCODE_PORT']+"',1,NULL,NULL,1,'"+data['PORT_EXPAND']+"')"
 	print (sql)
-	cursor = psb_sales_conn.query(sql)
-	psb_sales_conn.comit()
+	cursor = db_connection_ikrom.query(sql)
+	db_connection_ikrom.comit()
 
 	data['SC_NUMBER'] = "✔"
 	data['IN_NUMBER'] = "✔"
@@ -325,8 +325,8 @@ def qrcode_dropcore(update, context):
 	context.user_data['QRCODE_DROPCORE'] = update.message.text
 	sql = " insert into valdat_omset values (NULL,1,1,'"+context.user_data['CEK_IN_OMSET']+"','"+context.user_data['OLD_PORT']+"','"+context.user_data['NEW_PORT']+"','"+context.user_data['OLD_ODP']+"','"+context.user_data['NEW_ODP']+"','"+context.user_data['NO_TELP']+"','"+context.user_data['NO_INTERNET']+"','"+context.user_data['QRCODE_DROPCORE']+"',1,NULL,NULL,1)"
 	print (sql)
-	cursor = psb_sales_conn.query(sql)
-	psb_sales_conn.comit()
+	cursor = db_connection_ikrom.query(sql)
+	db_connection_ikrom.comit()
 
 	context.user_data['CEK_IN_OMSET'] = "✔"
 	context.user_data['OLD_PORT'] = "✔"
@@ -563,8 +563,8 @@ def customer_coordinate(update, context):
 	context.user_data['CUSTOMER_COORDINATE'] = location
 	sql = " insert into valdat_migrate values (NULL,'"+data['No. SC']+"','"+context.user_data['CEK_IN_MIGRATE']+"','"+context.user_data['NO_TELP_MIGRATE']+"','"+context.user_data['NO_INET_MIGRATE']+"','"+context.user_data['CUSTOMER_NAME']+"','"+context.user_data['CUSTOMER_ADDRESS']+"','"+context.user_data['CEK_STO_MIGRATE']+"','"+context.user_data['ODP_MIGRATE']+"','"+context.user_data['PORT']+"','"+context.user_data['DC_LENGTH']+"','"+context.user_data['QR_CODE_MIGRATE']+"','"+context.user_data['SN_ONT']+"','"+context.user_data['SN_STB']+"','"+context.user_data['TECHNICIAN_NAME']+"','"+context.user_data['MITRA']+"','"+context.user_data['TAG_ODP_MIGRATE']+"','"+context.user_data['CUSTOMER_COORDINATE']+"',NULL,1,1,'"+context.user_data['NO_HP']+"') "
 	print (sql)
-	cursor = psb_sales_conn.query(sql)
-	psb_sales_conn.comit()
+	cursor = db_connection_ikrom.query(sql)
+	db_connection_ikrom.comit()
 
 	context.user_data['CEK_SC_MIGRATE'] = "✔"
 	context.user_data['CEK_IN_MIGRATE'] = "✔"
@@ -736,11 +736,11 @@ def tag_pelanggan_psb(update, context):
 	user_location = update.message.location
 	location = str(user_location.latitude) + ", " + str(user_location.longitude)
 	data['TAG_PELANGGAN_PSB'] = location
-	psb_sales_conn.connect()
+	db_connection_ikrom.connect()
 	sql = " insert into valdat_psb values (NULL,NULL,'"+data['No. SC']+"',NULL,NULL,'"+data['No TELP']+"','"+data['No INET']+"',NULL,'"+data['PELANGGAN']+"','"+data['ALAMAT']+"',NULL,'"+data['STO']+"','"+data['ODP WO']+"','"+data['ODP_PSB']+"','"+data['PORT_PSB']+"','"+data['DC_PSB']+"','"+data['QR_CODE_PSB']+"','"+data['ONT_PSB']+"','"+data['STB_PSB']+"','"+data['TAG_ODP_PSB']+"','"+data['TAG_PELANGGAN_PSB']+"',NULL,NULL,NULL,NULL,NULL,NULL,NULL) "
 	print (sql)
-	cursor = psb_sales_conn.query(sql)
-	psb_sales_conn.comit()
+	cursor = db_connection_ikrom.query(sql)
+	db_connection_ikrom.comit()
 
 	update.message.reply_text("Masukkan foto rumah pelanggan :", reply_markup=ReplyKeyboardRemove())
 	return RUMAH_PELANGGAN
@@ -923,11 +923,11 @@ def sales_lokasi_pelanggan(update, context):
 	location = str(user_location.latitude) + ", " + str(user_location.longitude)
 	data['SALES_LOKASI_PELANGGAN'] = location
 	
-	psb_sales_conn.connect()
+	db_connection_ikrom.connect()
 	sql = " insert into valdat_sales values (NULL,'"+data['TRACK ID']+"','"+data['K-CONTACT']+"','"+data['NO SC']+"','"+data['TANGGAL ORDER']+"','"+data['STATUS']+"','"+data['NAMA CUSTOMER']+"','"+data['PAKET']+"','"+data['ALAMAT INSTALASI']+"','"+data['STO']+"','"+data['SALES_RUMAH_PELANGGAN']+"','"+data['SALES_LOKASI_PELANGGAN']+"') "
 	print(sql)
-	cursor = psb_sales_conn.query(sql)
-	psb_sales_conn.comit()
+	cursor = db_connection_ikrom.query(sql)
+	db_connection_ikrom.comit()
 	data['SALES_RUMAH_PELANGGAN'] = " ✔️ "
 	update.message.reply_text("Data \n" "{}".format(list_data_myir(data)))
 	update.message.reply_text("Terimakasih Data Telah Tersimpan", reply_markup=ReplyKeyboardRemove())
@@ -982,7 +982,7 @@ def main():
 	# Post version 12 this will no longer be necessary
 	updater = Updater("981505990:AAHF0w1V92Nc2ioenG7ggi_RRP4L-CVuEqI", use_context=True)
 
-	psb_sales_conn.connect()
+	db_connection_ikrom.connect()
 	# Get the dispatcher to register handlers
 	dp = updater.dispatcher
 

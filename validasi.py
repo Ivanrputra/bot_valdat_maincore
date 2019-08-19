@@ -32,7 +32,7 @@ import os
 
 ############### CONFIGURE THIS ###################
 # Open database connection
-# db = pymysql.connect("localhost","root","","valdat_test")
+# db = pymysql.connect('localhost','root','','daman')
 db = pymysql.connect("10.112.82.94","ikrom","akuadmindb","valdat_test")
 
 ##################################################
@@ -330,17 +330,20 @@ def photo1(update, context):
         photo_file.download(context.user_data['path']+'/odp_luar.jpg')
     except:
         photo_file.download(context.user_data['path']+'/odp_luar.jpg')
-    
+    context.user_data['odp_luar'] = context.user_data['path']+'/odp_luar.jpg'
     
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
     update.message.reply_text('Foto ODP Tampak Luar Berhasil Disimpan.\nSilahkan Upload Foto ODP Tampak Dalam:')
 
-    return PHOTO5
+    return PHOTO2
 
 def photo2(update, context):
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
     photo_file.download(context.user_data['path']+'/odp_dalam.jpg')
+
+    context.user_data['odp_dalam'] = context.user_data['path']+'/odp_dalam.jpg'
+
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
     update.message.reply_text('Foto ODP Tampak Dalam Berhasil Disimpan.\nSilahkan Upload Foto Port ODP:')
 
@@ -350,6 +353,9 @@ def photo3(update, context):
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
     photo_file.download(context.user_data['path']+'/odp_port.jpg')
+
+    context.user_data['odp_port'] = context.user_data['path']+'/odp_port.jpg'
+
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
     update.message.reply_text('Foto Port ODP Berhasil Disimpan.\nSilahkan Upload Foto QRCode ODP:')
 
@@ -359,6 +365,9 @@ def photo4(update, context):
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
     photo_file.download(context.user_data['path']+'/qrcode_odp.jpg')
+
+    context.user_data['qrcode_odp'] = context.user_data['path']+'/qrcode_odp.jpg'
+
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
     update.message.reply_text('Foto QRCode ODP Berhasil Disimpan.\nSilahkan Upload Foto Redaman ODP:')
 
@@ -368,7 +377,17 @@ def photo5(update, context):
     user = update.message.from_user
     photo_file = update.message.photo[-1].get_file()
     photo_file.download(context.user_data['path']+'/odp_redaman.jpg')
+
+    context.user_data['odp_redaman'] = context.user_data['path']+'/odp_redaman.jpg'
+
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
+
+    media = []
+    media.append(context.user_data['odp_luar'])
+    media.append(context.user_data['odp_dalam'])
+    media.append(context.user_data['odp_port'])
+    media.append(context.user_data['qrcode_odp'])
+    media.append(context.user_data['odp_redaman'])
    
     datasimpan = []
     dataket = []
@@ -392,6 +411,15 @@ def photo5(update, context):
             cursor.execute("insert into valdat_validasi (odp_port, qrcode_dropcore, odp_id) VALUES ('"+str(datasimpan[a+5])+"', '"+datasimpan[a+5]+"', '"+str(idodp)+"')")
             db.commit()
             a+=1
+
+        for x in media:
+            sql = (" insert into valdat_evidence (url,category_id,odp_id) values ('"+
+                str(x)+"',"+
+                str(1)+","+
+                str(idodp)+") ")
+            print(sql)
+            cursor = psb_sales_conn.query(sql)
+            db.commit()
         update.message.reply_text('Foto Redaman ODP Berhasil Disimpan.\nSemua Laporan Telah Diterima.\nTerima kasih.')
     except:
         db.rollback()
@@ -407,14 +435,12 @@ def skip_location(update, context):
 
     return BIO
 
-
 def bio(update, context):
     user = update.message.from_user
     logger.info("Bio of %s: %s", user.first_name, update.message.text)
     update.message.reply_text('Thank you! I hope we can talk again some day.')
 
     return ConversationHandler.END
-
 
 def cancel(update, context):
     user = update.message.from_user
@@ -424,11 +450,9 @@ def cancel(update, context):
 
     return ConversationHandler.END
 
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-
 
 def main():
     conv_handler = ConversationHandler(
