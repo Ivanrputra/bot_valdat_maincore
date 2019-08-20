@@ -25,6 +25,8 @@ import logging
 import validasi
 #bot validasi TELKOM UNIVERSITY
 import psb_sales
+#bot fala, pkl UB
+import expand_omset_migrate
 
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
@@ -392,7 +394,16 @@ def main():
     dp.add_handler(valdat_maincore_odp)
     dp.add_handler(valdat_maincore_odc)
     dp.add_handler(validasi.main())
-    dp.add_handler(psb_sales.main())
+
+    psb,sales = psb_sales.main()
+    dp.add_handler(psb)
+    dp.add_handler(sales)
+
+    expand,omset,migrate = expand_omset_migrate.main()
+    dp.add_handler(expand)
+    dp.add_handler(omset)
+    dp.add_handler(migrate)
+    # dp.add_handler(expand_omset_migrate.main())
     
     # log all errors
     dp.add_error_handler(error)

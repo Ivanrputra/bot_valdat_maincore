@@ -23,7 +23,7 @@ import logging
 import requests
 import json
 import os
-import psb_sales_conn
+import db_conn
 
 import sys
 import PIL
@@ -48,14 +48,14 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 ID_PSB,SC, INET,TELP,SID,PELGN,ALAMAT,STO,ODP_WO,ODP_REAL,PORT,DC,QR_CODE,ONT,\
-STB,TAG_ODP,TAG_PELGN,HOBBY, PHOTO, LOCATION, BIO, INPUT, CEK_SC, INPUT_SC, CONFIRM, \
+STB,TAG_ODP,TAG_PELGN,HOBBY, PHOTO, LOCATION, BIO, INPUT, CEK_SC, CONFIRM, \
 RUMAH_PELANGGAN, PETUGAS_PELANGGAN, PETUGAS_LAYANAN, HASIL_REDAMAN, PERANGKAT_ONTSTB, FOTO_ODP, CHECK_MYIR, \
-CONFIRM_SALES, SALES_RUMAH_PELANGGAN, SALES_LOKASI_PELANGGAN = range(35)
+CONFIRM_SALES, SALES_RUMAH_PELANGGAN, SALES_LOKASI_PELANGGAN = range(34)
 
-psb_sales_conn.connect()
+db_conn.connect()
 
 
-def start(update, context):
+def start_psb(update, context):
     context.user_data.clear()
     context.user_data['regex_odp']  = r"^((ODP|OTB|GCL)-\D{3}-((\D{2,4}|\d{2,3}|\D\d{2,3})\/\d{1,3}|\d{2,3})|NO LABEL|TANPA TUTUP)"
     context.user_data['regex_port'] = r"^(\d{,2}.\d{,2}|\d{,2})"
@@ -73,25 +73,41 @@ def start(update, context):
     else:
         print("Successfully created the directory %s" % context.user_data['pathmedia'])
 
-    reply_keyboard = [['PSB','SALES']]
     update.message.reply_text(
         'Hi!ヽ(^o^)丿 Aku adalah valdat bot. '
         'Ketik /cancel untuk berhenti .\n\n',
-    reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
-    return INPUT_SC
+    reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text(
+        'Masukkan nomor SC.\n\n',
+        reply_markup=ReplyKeyboardRemove())
+    return CEK_SC
 
-def input_sc(update, context):
-    pilihan = update.message.text
-    if "PSB" == pilihan:
-        update.message.reply_text(
-            'Masukkan nomor SC.\n\n',
-            reply_markup=ReplyKeyboardRemove())
-        return CEK_SC
-    else :
-        update.message.reply_text(
-            'Masukkan Nomor Myir\n\n',
-            reply_markup=ReplyKeyboardRemove())
-        return CHECK_MYIR
+def start_sales(update, context):
+    context.user_data.clear()
+    context.user_data['regex_odp']  = r"^((ODP|OTB|GCL)-\D{3}-((\D{2,4}|\d{2,3}|\D\d{2,3})\/\d{1,3}|\d{2,3})|NO LABEL|TANPA TUTUP)"
+    context.user_data['regex_port'] = r"^(\d{,2}.\d{,2}|\d{,2})"
+    context.user_data['regex_dc']   = r"^(\d{1,4})"
+
+    # global tanggal, pathmedia
+    # today = date.today()
+    context.user_data['tanggal'] = date.today().strftime("%Y-%m-%d")
+    # global path
+    context.user_data['pathmedia'] = "../valdat_web/media/evidence/"+context.user_data['tanggal']
+    try:
+        os.makedirs(context.user_data['pathmedia'])
+    except OSError:
+        print("directory sudah ada %s " % context.user_data['pathmedia'])
+    else:
+        print("Successfully created the directory %s" % context.user_data['pathmedia'])
+
+    update.message.reply_text(
+        'Hi!ヽ(^o^)丿 Aku adalah valdat bot. '
+        'Ketik /cancel untuk berhenti .\n\n',
+        reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text(
+        'Masukkan Nomor Myir\n\n',
+        reply_markup=ReplyKeyboardRemove())
+    return CHECK_MYIR
 
 def cek_sc(update, context):
     # global data
@@ -286,7 +302,7 @@ def foto_odp(update, context):
     context.user_data['data']['FOTO ODP'] = path
 
     # insert to valdat_psb
-    psb_sales_conn.connect()
+    db_conn.connect()
     sql = ("insert into valdat_psb (ps_date,report_date,assigned_hd_date,sc,telegram_chat_id,telegram_username,no_voice,no_internet,sid,customer_name,customer_address,datel,sto,odp_wo,odp_real,odp_port,dc_length,qrcode_dropcore,sn_ont,sn_stb,odp_coordinate,customer_coordinate,status,status_dava,message_id)"+
         "values ('"+str(date.today())+"','"+str(date.today())+"','"+str(date.today())+"','"+
         context.user_data['data']['No. SC']+"',NULL,NULL,'"+
@@ -305,8 +321,8 @@ def foto_odp(update, context):
         context.user_data['data']['TAG ODP']+"','"+
         context.user_data['data']['TAG PELANGGAN']+"',NULL,NULL,NULL) ")    
     print (sql)
-    cursor = psb_sales_conn.query(sql)
-    psb_sales_conn.comit()
+    cursor = db_conn.query(sql)
+    db_conn.comit()
     # insert to valdat_psb
 
     media = []
@@ -324,8 +340,8 @@ def foto_odp(update, context):
             str(1)+","+
             str(psb_id)+") ")
         print(sql)
-        cursor = psb_sales_conn.query(sql)
-    psb_sales_conn.comit()
+        cursor = db_conn.query(sql)
+    db_conn.comit()
 
 
     update.message.reply_text("Data \n" "{}".format(list_data(context.user_data['data'])))
@@ -378,7 +394,7 @@ def check_myir(update, context):
     context.user_data['data']['K-CONTACT'] = json_['data']['detail'][0]['x3']
     context.user_data['data']['NO SC'] = "-" if data_json['scid'] is None else data_json['scid']
     context.user_data['data']['TANGGAL ORDER'] = "-" if data_json['orderDate'] is None else data_json['scid']
-    context.user_data['data']['STATUS'] = data_json['status_name']
+    context.user_data['data']['STATUS MYIR'] = data_json['status_name']
     context.user_data['data']['NAMA CUSTOMER'] = data_json['user_name']
     context.user_data['data']['PAKET'] = data_json['name']
     context.user_data['data']['ALAMAT INSTALASI'] = json_['data']['address']['address']
@@ -421,13 +437,13 @@ def sales_lokasi_pelanggan(update, context):
     user_location = update.message.location
     location = str(user_location.latitude) + ", " + str(user_location.longitude)
     context.user_data['data']['TAG LOKASI PELANGGAN'] = location
-    psb_sales_conn.connect()
+    db_conn.connect()
     sql = (" insert into valdat_sales (track_id,k_contact,no_sc,tanggal_order,status,nama_customer,paket,alamat_instalasi,sto,foto_rumah_pelanggan,tag_lokasi_pelanggan) values ('"+
         context.user_data['data']['TRACK ID']+"','"+
         context.user_data['data']['K-CONTACT']+"','"+
         context.user_data['data']['NO SC']+"','"+
         context.user_data['data']['TANGGAL ORDER']+"','"+
-        context.user_data['data']['STATUS']+"','"+
+        context.user_data['data']['STATUS MYIR']+"','"+
         context.user_data['data']['NAMA CUSTOMER']+"','"+
         context.user_data['data']['PAKET']+"','"+
         context.user_data['data']['ALAMAT INSTALASI']+"','"+
@@ -435,8 +451,8 @@ def sales_lokasi_pelanggan(update, context):
         context.user_data['data']['FOTO RUMAH PELANGGAN']+"','"+
         context.user_data['data']['TAG LOKASI PELANGGAN']+"') ")
     print(sql)
-    cursor = psb_sales_conn.query(sql)
-    psb_sales_conn.comit()
+    cursor = db_conn.query(sql)
+    db_conn.comit()
 
     #pandaiman
     sales_id = cursor.lastrowid
@@ -445,8 +461,8 @@ def sales_lokasi_pelanggan(update, context):
         str(1)+","+
         str(sales_id)+") ")
     print(sql)
-    cursor = psb_sales_conn.query(sql)
-    psb_sales_conn.comit()
+    cursor = db_conn.query(sql)
+    db_conn.comit()
     #pandaiman
 
     context.user_data['data']['FOTO RUMAH PELANGGAN'] = " ✔️ "
@@ -468,11 +484,11 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('Sales_or_PSB', start)],
+    psb_handler = ConversationHandler(
+        entry_points=[CommandHandler('PSB', start_psb)],
 
         states={
-            INPUT_SC:[RegexHandler('^(PSB|SALES)$', input_sc)],
+            # INPUT_SC:[RegexHandler('^(PSB|SALES)$', input_sc)],
             ODP_REAL: [MessageHandler(Filters.text, odp_real)],
             PORT: [MessageHandler(Filters.text, port)],
             DC: [MessageHandler(Filters.text, dc)],
@@ -490,15 +506,20 @@ def main():
             INPUT: [RegexHandler('^(INPUT_DATA)$', input)],
             CEK_SC: [MessageHandler(Filters.text, cek_sc)],
             CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
-
-            CHECK_MYIR : [MessageHandler(Filters.text, check_myir)],
-            CONFIRM_SALES: [RegexHandler('^(IYA|TIDAK)$', confirm_sales)],
-            SALES_RUMAH_PELANGGAN : [MessageHandler(Filters.photo, sales_rumah_pelanggan)],
-            SALES_LOKASI_PELANGGAN : [MessageHandler(Filters.location, sales_lokasi_pelanggan)],
-
-
         },
 
         fallbacks=[CommandHandler('cancel', cancel)]
     )
-    return conv_handler
+    sales_handler = ConversationHandler(
+        entry_points=[CommandHandler('SALES', start_sales)],
+
+        states={
+            CHECK_MYIR : [MessageHandler(Filters.text, check_myir)],
+            CONFIRM_SALES: [RegexHandler('^(IYA|TIDAK)$', confirm_sales)],
+            SALES_RUMAH_PELANGGAN : [MessageHandler(Filters.photo, sales_rumah_pelanggan)],
+            SALES_LOKASI_PELANGGAN : [MessageHandler(Filters.location, sales_lokasi_pelanggan)],
+        },
+
+        fallbacks=[CommandHandler('cancel', cancel)]
+    )
+    return psb_handler,sales_handler
