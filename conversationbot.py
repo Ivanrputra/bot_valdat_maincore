@@ -410,6 +410,12 @@ def main():
 
     # Start the Bot
     updater.start_polling()
+    # updater.start_webhook(listen='0.0.0.0',
+    #                   port=80,
+    #                   url_path='900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA',
+    #                   key='private.key',
+    #                   cert='cert.pem',
+    #                   webhook_url='https://example.com:8443/TOKEN')
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
