@@ -30,6 +30,7 @@ import expand_omset_migrate
 
 
 import urllib.request
+import requests,json
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                           ConversationHandler)
@@ -40,7 +41,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC,CEK_SC = range(5)
+MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC,CEK_MYIR= range(5)
 
 def connection():
     conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
@@ -363,38 +364,66 @@ def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
-def StartCekSC(update, context):
+def get_myir(myir):
+    url = 'http://api.indihome.co.id/api/track-view'
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+               "Authorization": "Basic bXlpbmRpaG9tZTpwN2Qya0xYNGI0TkY1OFZNODR2Vw=="}
+    payload = 'guid=myindihome#2017&code=&data={"trackId":"%s"}' % myir
+
+    return requests.post(url, data=payload, headers=headers)
+
+def StartCekMYIR(update, context):
     user = update.message.from_user
-    update.message.reply_text("Masukkan Nomor SC :")
-    return CEK_SC
-def Cek_SC(update, context):
+    update.message.reply_text("Masukkan Nomor MYIR :")
+    return CEK_MYIR
+def Cek_MYIR(update, context):
     # user = update.message.from_user
     # try:
-    conn    = connection()
-    cursor  = conn.cursor()
-    cursor.execute("select * from valdat_sales where no_sc = '"+str(update.message.text)+"'")
-    if cursor.fetchone() != None:
-        id,track_id,k_contact,no_sc,tanggal_order,status,nama_customer,paket,alamat_instalasi,sto,foto_rumah_pelanggan,tag_lokasi_pelanggan = cursor.fetchone()
-        update.message.reply_text(
-    "TRACK ID   :  "+track_id+
-    "\n\nK_CONTACT   :  "+k_contact+
-    "\n\nNO_SC   :  "+no_sc+
-    "\n\nTANGGAL_ORDER   :  "+tanggal_order+
-    "\n\nSTATUS  :  "+status+
-    "\n\nNAMA_CUSTOMER   :  "+nama_customer+
-    "\n\nPAKET   :  "+paket+
-    "\n\nALAMAT_INSTALASI    :  "+alamat_instalasi+
-    "\n\nSTO :  "+sto
-    # "\n foto_rumah_pelanggan    :  "+foto_rumah_pelanggan+
-    # "\n tag_lokasi_pelanggan    :  "+tag_lokasi_pelanggan
-    )
-        context.bot.send_photo(chat_id=update.message.chat_id,photo=open(str(foto_rumah_pelanggan),'rb'))
-        loc = tag_lokasi_pelanggan.split(',')   
-        urllib.request.urlopen("https://api.telegram.org/bot"+str(TOKEN)+"/sendlocation?chat_id="+str(update.message.chat_id)+"&latitude="+str(loc[0].strip())+"&longitude="+str(loc[1].strip())).read()
-        return ConversationHandler.END
-    else:
-        update.message.reply_text("SC tidak ditemukan masukkan SC lagi :")
-        return CEK_SC
+    data_ = str(get_myir(update.message.text).text)
+    json_ = json.loads(data_)
+    data={}
+    if json_['data'] == None:
+        update.message.reply_text('MYIR tidak ditemukan, Masukkan Nomor MYIR lagi :',reply_markup=ReplyKeyboardRemove())
+        return CEK_MYIR
+    else :
+        conn    = connection()
+        cursor  = conn.cursor()
+        cursor.execute("select foto_rumah_pelanggan,tag_lokasi_pelanggan from valdat_sales where track_id = '"+str(update.message.text)+"'")
+        if cursor.fetchone() != None:
+            foto_rumah_pelanggan,tag_lokasi_pelanggan = cursor.fetchone()
+            data_json = json_['data']
+            data['TRACK ID']           = data_json['track_id']
+            data['K-CONTACT']          = json_['data']['detail'][0]['x3']
+            data['NO SC']              = "-" if data_json['scid'] is None else data_json['scid']
+            data['TANGGAL ORDER']      = "-" if data_json['orderDate'] is None else data_json['scid']
+            data['STATUS MYIR']        = data_json['status_name']
+            data['NAMA CUSTOMER']      = data_json['user_name']
+            data['PAKET']              = data_json['name']
+            data['ALAMAT INSTALASI']   = json_['data']['address']['address']
+            data['STO']                = json_['data']['data1']['sto']
+            update.message.reply_text(
+        "TRACK ID : "+data['TRACK ID']+
+        "\n\nK_CONTACT : "+data['K-CONTACT']+
+        "\n\nNO_SC : "+data['NO SC']+
+        "\n\nTANGGAL_ORDER :  "+data['TANGGAL ORDER']+
+        "\n\nSTATUS : "+data['STATUS MYIR']+
+        "\n\nNAMA_CUSTOMER : "+data['NAMA CUSTOMER']+
+        "\n\nPAKET : "+data['PAKET']+
+        "\n\nALAMAT_INSTALASI : "+data['ALAMAT INSTALASI']+
+        "\n\nSTO : "+data['STO']
+        # "\n foto_rumah_pelanggan    :  "+foto_rumah_pelanggan+
+        # "\n tag_lokasi_pelanggan    :  "+tag_lokasi_pelanggan
+        )
+            update.message.reply_text("berikut foto rumah pelanggan")
+            context.bot.send_photo(chat_id=update.message.chat_id,photo=open(str(foto_rumah_pelanggan),'rb'))
+            update.message.reply_text("berikut lokasi rumah pelangan")
+            loc = tag_lokasi_pelanggan.split(',')   
+            urllib.request.urlopen("https://api.telegram.org/bot"+str(TOKEN)+"/sendlocation?chat_id="+str(update.message.chat_id)+"&latitude="+str(loc[0].strip())+"&longitude="+str(loc[1].strip())).read()
+            return ConversationHandler.END
+        else:
+            update.message.reply_text("belum ada foto rumah pelanggan dan tangging lokasi pelanggan dari sales")
+            return CEK_SC
+
 def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
@@ -425,18 +454,18 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    cek_sc_handler = ConversationHandler(
-        entry_points=[CommandHandler('cek_sc', StartCekSC)],
+    cek_myir_handler = ConversationHandler(
+        entry_points=[CommandHandler('cek_myir', StartCekMYIR)],
 
         states={
-            CEK_SC: [MessageHandler(Filters.text, Cek_SC)],
+            CEK_MYIR: [MessageHandler(Filters.text, Cek_MYIR)],
         },
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
     dp.add_handler(valdat_maincore_odp)
     dp.add_handler(valdat_maincore_odc)
-    dp.add_handler(cek_sc_handler)
+    dp.add_handler(cek_myir_handler)
 
     #hendro
     dp.add_handler(validasi.main())

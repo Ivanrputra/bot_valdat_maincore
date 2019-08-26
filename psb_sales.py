@@ -396,13 +396,13 @@ def check_myir(update, context):
 
     print(data_)
     data_json = json_['data']
-    context.user_data['data']['TRACK ID'] = data_json['track_id']
-    context.user_data['data']['K-CONTACT'] = json_['data']['detail'][0]['x3']
-    context.user_data['data']['NO SC'] = "-" if data_json['scid'] is None else data_json['scid']
-    context.user_data['data']['TANGGAL ORDER'] = "-" if data_json['orderDate'] is None else data_json['scid']
-    context.user_data['data']['STATUS MYIR'] = data_json['status_name']
-    context.user_data['data']['NAMA CUSTOMER'] = data_json['user_name']
-    context.user_data['data']['PAKET'] = data_json['name']
+    context.user_data['data']['TRACK ID']           = data_json['track_id']
+    context.user_data['data']['K-CONTACT']          = json_['data']['detail'][0]['x3']
+    context.user_data['data']['NO SC']              = "-" if data_json['scid'] is None else data_json['scid']
+    context.user_data['data']['TANGGAL ORDER']      = "-" if data_json['orderDate'] is None else data_json['scid']
+    context.user_data['data']['STATUS MYIR']        = data_json['status_name']
+    context.user_data['data']['NAMA CUSTOMER']      = data_json['user_name']
+    context.user_data['data']['PAKET']              = data_json['name']
     context.user_data['data']['ALAMAT INSTALASI'] = json_['data']['address']['address']
     context.user_data['data']['STO'] = json_['data']['data1']['sto']
 
