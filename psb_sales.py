@@ -183,7 +183,7 @@ def port(update, context):
     context.user_data['data']['PORT'] = update.message.text
     matches = re.search(context.user_data['regex_port'], update.message.text, re.IGNORECASE)
     if matches:
-        update.message.reply_text("Masukkan data DC :",reply_markup=ReplyKeyboardRemove())
+        update.message.reply_text("Masukkan panjang DC :",reply_markup=ReplyKeyboardRemove())
         return DC
     else:
         update.message.reply_text("Format DC salah silahkan masukkan lagi. \nFormat Port yang benar berupa angka. \n ", reply_markup=ReplyKeyboardRemove())
@@ -193,7 +193,7 @@ def dc(update, context):
     # global data
     # global regex_dc
     user = update.message.from_user
-    context.user_data['data']['DC'] = update.message.text
+    context.user_data['data']['panjang DC'] = update.message.text
     matches = re.search(context.user_data['regex_dc'], update.message.text, re.IGNORECASE)
 
     if matches:
@@ -214,13 +214,13 @@ def sn_ont(update, context):
     # global data
     user = update.message.from_user
     context.user_data['data']['SN ONT'] = update.message.text
-    update.message.reply_text("Masukkan data SN STB :",reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text("Masukkan data MAC STB :",reply_markup=ReplyKeyboardRemove())
     return STB
 
 def sn_stb(update, context):
     # global data
     user = update.message.from_user
-    context.user_data['data']['SN STB'] = update.message.text
+    context.user_data['data']['MAC STB'] = update.message.text
     update.message.reply_text("Masukkan data tag ODP :",reply_markup=ReplyKeyboardRemove())
     return TAG_ODP
 
@@ -260,7 +260,7 @@ def foto_petugas_pelanggan(update, context):
     path = context.user_data['pathmedia']+'/psb_{}_petugas-dengan-pelanggan.jpg'.format(context.user_data['data']['No. SC'])
     photo_file.download(path)
     context.user_data['data']['FOTO PETUGAS & PELANGGAN'] = path
-    update.message.reply_text("Masukkan foto petugas layanan :", reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text("Masukkan foto petugas dengan layanan :", reply_markup=ReplyKeyboardRemove())
     return PETUGAS_LAYANAN
 
 def foto_petugas_layanan(update, context):
@@ -314,10 +314,10 @@ def foto_odp(update, context):
         context.user_data['data']['ODP WO']+"','"+
         context.user_data['data']['ODP REAL']+"','"+
         context.user_data['data']['PORT']+"','"+
-        context.user_data['data']['DC']+"','"+
+        context.user_data['data']['panjang DC']+"','"+
         context.user_data['data']['QR CODE']+"','"+
         context.user_data['data']['SN ONT']+"','"+
-        context.user_data['data']['SN STB']+"','"+
+        context.user_data['data']['MAC STB']+"','"+
         context.user_data['data']['TAG ODP']+"','"+
         context.user_data['data']['TAG PELANGGAN']+"',NULL,NULL,NULL) ")    
     print (sql)
@@ -343,6 +343,12 @@ def foto_odp(update, context):
         cursor = db_conn.query(sql)
     db_conn.comit()
 
+    context.user_data['data']['FOTO RUMAH PELANGGAN']= " ✔️ "
+    context.user_data['data']['FOTO PETUGAS & PELANGGAN']= " ✔️ "
+    context.user_data['data']['FOTO PETUGAS & LAYANAN']= " ✔️ "
+    context.user_data['data']['FOTO HASIL REDAMAN']= " ✔️ "
+    context.user_data['data']['FOTO ONT & STB']= " ✔️ "
+    context.user_data['data']['FOTO ODP']= " ✔️ "
 
     update.message.reply_text("Data \n" "{}".format(list_data(context.user_data['data'])))
     update.message.reply_text("Terimakasih Data Telah Tersimpan", reply_markup=ReplyKeyboardRemove())

@@ -28,19 +28,17 @@ import psb_sales
 #bot fala, pkl UB
 import expand_omset_migrate
 
-
-import urllib.request
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                           ConversationHandler)
-TOKEN = "900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA"
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC,CEK_SC = range(5)
+MAINCORE_ODP,ODP_LOCATION,ODC_LOCATION,MAINCORE_ODC = range(4)
 
 def connection():
     conn = pymysql.connect('10.112.82.94','ikrom','akuadmindb','valdat_test')
@@ -363,43 +361,11 @@ def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
-def StartCekSC(update, context):
-    user = update.message.from_user
-    update.message.reply_text("Masukkan Nomor SC :")
-    return CEK_SC
-def Cek_SC(update, context):
-    # user = update.message.from_user
-    # try:
-    conn    = connection()
-    cursor  = conn.cursor()
-    cursor.execute("select * from valdat_sales where no_sc = '"+str(update.message.text)+"'")
-    if cursor.fetchone() != None:
-        id,track_id,k_contact,no_sc,tanggal_order,status,nama_customer,paket,alamat_instalasi,sto,foto_rumah_pelanggan,tag_lokasi_pelanggan = cursor.fetchone()
-        update.message.reply_text(
-    "TRACK ID   :  "+track_id+
-    "\n\nK_CONTACT   :  "+k_contact+
-    "\n\nNO_SC   :  "+no_sc+
-    "\n\nTANGGAL_ORDER   :  "+tanggal_order+
-    "\n\nSTATUS  :  "+status+
-    "\n\nNAMA_CUSTOMER   :  "+nama_customer+
-    "\n\nPAKET   :  "+paket+
-    "\n\nALAMAT_INSTALASI    :  "+alamat_instalasi+
-    "\n\nSTO :  "+sto
-    # "\n foto_rumah_pelanggan    :  "+foto_rumah_pelanggan+
-    # "\n tag_lokasi_pelanggan    :  "+tag_lokasi_pelanggan
-    )
-        context.bot.send_photo(chat_id=update.message.chat_id,photo=open(str(foto_rumah_pelanggan),'rb'))
-        loc = tag_lokasi_pelanggan.split(',')   
-        urllib.request.urlopen("https://api.telegram.org/bot"+str(TOKEN)+"/sendlocation?chat_id="+str(update.message.chat_id)+"&latitude="+str(loc[0].strip())+"&longitude="+str(loc[1].strip())).read()
-        return ConversationHandler.END
-    else:
-        update.message.reply_text("SC tidak ditemukan masukkan SC lagi :")
-        return CEK_SC
 def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater(TOKEN, use_context=True)
+    updater = Updater("900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA", use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -425,28 +391,14 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    cek_sc_handler = ConversationHandler(
-        entry_points=[CommandHandler('cek_sc', StartCekSC)],
-
-        states={
-            CEK_SC: [MessageHandler(Filters.text, Cek_SC)],
-        },
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-
     dp.add_handler(valdat_maincore_odp)
     dp.add_handler(valdat_maincore_odc)
-    dp.add_handler(cek_sc_handler)
-
-    #hendro
     dp.add_handler(validasi.main())
 
-    #TEL UNIV
     psb,sales = psb_sales.main()
     dp.add_handler(psb)
     dp.add_handler(sales)
 
-    #UB
     expand,omset,migrate = expand_omset_migrate.main()
     dp.add_handler(expand)
     dp.add_handler(omset)
@@ -454,7 +406,7 @@ def main():
     # dp.add_handler(expand_omset_migrate.main())
     
     # log all errors
-    dp.add_error_handler(error)
+pan    dp.add_error_handler(error)
 
     # Start the Bot
     # updater.start_polling()
@@ -463,11 +415,10 @@ def main():
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.start_webhook(listen="0.0.0.0",
-        port=8443,
+        port=8080,
         url_path='900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA')
-    updater.bot.set_webhook("https://nervous-liger-30.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
+    updater.bot.set_webhook("https://light-bulldog-97.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
     updater.idle()
-    
 
 if __name__ == '__main__':
     main()
