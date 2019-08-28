@@ -403,14 +403,14 @@ def Cek_MYIR(update, context):
             data['STO']                = json_['data']['data1']['sto']
             update.message.reply_text(
         "TRACK ID : "+data['TRACK ID']+
-        "\n\nK_CONTACT : "+data['K-CONTACT']+
-        "\n\nNO_SC : "+data['NO SC']+
-        "\n\nTANGGAL_ORDER :  "+data['TANGGAL ORDER']+
-        "\n\nSTATUS : "+data['STATUS MYIR']+
-        "\n\nNAMA_CUSTOMER : "+data['NAMA CUSTOMER']+
-        "\n\nPAKET : "+data['PAKET']+
-        "\n\nALAMAT_INSTALASI : "+data['ALAMAT INSTALASI']+
-        "\n\nSTO : "+data['STO']
+        "\nK_CONTACT : "+data['K-CONTACT']+
+        "\nNO_SC : "+data['NO SC']+
+        "\nTANGGAL_ORDER :  "+data['TANGGAL ORDER']+
+        "\nSTATUS : "+data['STATUS MYIR']+
+        "\nNAMA_CUSTOMER : "+data['NAMA CUSTOMER']+
+        "\nPAKET : "+data['PAKET']+
+        "\nALAMAT_INSTALASI : "+data['ALAMAT INSTALASI']+
+        "\nSTO : "+data['STO']
         # "\n foto_rumah_pelanggan    :  "+foto_rumah_pelanggan+
         # "\n tag_lokasi_pelanggan    :  "+tag_lokasi_pelanggan
         )
@@ -494,7 +494,7 @@ def main():
     updater.start_webhook(listen="0.0.0.0",
         port=8443,
         url_path='900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA')
-    updater.bot.set_webhook("https://nervous-liger-30.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
+    updater.bot.set_webhook("https://pandaimandaman.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
     updater.idle()
     
 
