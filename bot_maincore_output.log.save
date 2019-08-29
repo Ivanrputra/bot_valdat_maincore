@@ -1,0 +1,101 @@
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/validasi.py:462: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  VALIDASIODP: [RegexHandler('^(Validasiodp)$', validasiodp)],
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: message_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: channel_post_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: edited_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/validasi.py:466: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  GENDER: [RegexHandler('^(Boy|Girl|Other)$', gender)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:506: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  INPUT: [RegexHandler('^(INPUT_DATA)$', input)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:508: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:518: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM_SALES: [RegexHandler('^(IYA|TIDAK)$', confirm_sales)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/expand_omset_migrate.py:547: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/expand_omset_migrate.py:594: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM_MIGRATE: [RegexHandler('^(IYA|TIDAK)$', confirm_migrate)],
+2019-08-21 15:10:09,439 - telegram.ext.updater - INFO - Received signal 15 (SIGTERM), stopping...
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/validasi.py:462: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  VALIDASIODP: [RegexHandler('^(Validasiodp)$', validasiodp)],
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: message_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: channel_post_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/usr/local/lib/python3.6/dist-packages/telegram/ext/regexhandler.py:121: TelegramDeprecationWarning: edited_updates is deprecated. See https://git.io/fxJuV for more info
+  edited_updates=edited_updates)
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/validasi.py:466: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  GENDER: [RegexHandler('^(Boy|Girl|Other)$', gender)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:506: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  INPUT: [RegexHandler('^(INPUT_DATA)$', input)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:508: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py:518: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM_SALES: [RegexHandler('^(IYA|TIDAK)$', confirm_sales)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/expand_omset_migrate.py:547: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM: [RegexHandler('^(IYA|TIDAK)$', confirm)],
+/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/expand_omset_migrate.py:594: TelegramDeprecationWarning: RegexHandler is deprecated. See https://git.io/fxJuV for more info
+  CONFIRM_MIGRATE: [RegexHandler('^(IYA|TIDAK)$', confirm_migrate)],
+2019-08-21 15:14:50,025 - telegram.ext.dispatcher - ERROR - An uncaught error was raised while processing the update
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 141, in _new_conn
+    (self.host, self.port), self.timeout, **extra_kw)
+  File "/usr/lib/python3/dist-packages/urllib3/util/connection.py", line 83, in create_connection
+    raise err
+  File "/usr/lib/python3/dist-packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+TimeoutError: [Errno 110] Connection timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 601, in urlopen
+    chunked=chunked)
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 346, in _make_request
+    self._validate_conn(conn)
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 852, in _validate_conn
+    conn.connect()
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 284, in connect
+    conn = self._new_conn()
+  File "/usr/lib/python3/dist-packages/urllib3/connection.py", line 150, in _new_conn
+    self, "Failed to establish a new connection: %s" % e)
+urllib3.exceptions.NewConnectionError: <urllib3.connection.VerifiedHTTPSConnection object at 0x7f96543ae6a0>: Failed to establish a new connection: [Errno 110] Connection timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 440, in send
+    timeout=timeout
+  File "/usr/lib/python3/dist-packages/urllib3/connectionpool.py", line 639, in urlopen
+    _stacktrace=sys.exc_info()[2])
+  File "/usr/lib/python3/dist-packages/urllib3/util/retry.py", line 388, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='starclick.telkom.co.id', port=443): Max retries exceeded with url: /backend/public/api/tracking?_dc=1533002388191&ScNoss=true&Field=ORDER_ID&SearchText=20953642 (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x7f96543ae6a0>: Failed to establish a new connection: [Errno 110] Connection timed out',))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/telegram/ext/dispatcher.py", line 333, in process_update
+    handler.handle_update(update, self, check, context)
+  File "/usr/local/lib/python3.6/dist-packages/telegram/ext/conversationhandler.py", line 326, in handle_update
+    new_state = handler.handle_update(update, dispatcher, check_result, context)
+  File "/usr/local/lib/python3.6/dist-packages/telegram/ext/handler.py", line 117, in handle_update
+    return self.callback(update, context)
+  File "/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py", line 117, in cek_sc
+    data_ = str(get_sc(text).text)
+  File "/home/ikrom/projects/valdat_bot_python_ver2/bot_valdat_maincore/psb_sales.py", line 140, in get_sc
+    return requests.get(url)
+  File "/usr/lib/python3/dist-packages/requests/api.py", line 72, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/api.py", line 58, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 520, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 630, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 508, in send
+    raise ConnectionError(e, request=request)
+2019-08-21 15:17:21,724 - psb_sales - INFO - User Ivan canceled the conversation.
