@@ -55,10 +55,10 @@ ODC-BLB-FBM KAP 144
 IN
 OTB 1 PORT 5 CORE 5
 TO
-SPL-B 5 PORT 1&2
+SPL-B 5 PORT 1,2,3
 TO
-OTB 9 PORT 6&7 CORE 6&7
-DS 3 KAP 12 CORE 6&7
+OTB 9 PORT 6,7,8 CORE 6,7,8
+DS 3 KAP 12 CORE 6,7,8
 KET : FEEDER LOSS
 STO BLB
 KAP_DIS 12
@@ -81,20 +81,20 @@ def MaincoreOdc(update, context):
     distribusi                  = split_message[7].split()
     odc_out_port,odc_out_core,odc_splt_out,d_core = {},{},{},{}
 
-    if len(odc_split[3].split('&')) == 1 and len(odc_out[3].split('&')) == 1 and len(odc_out[5].split('&')) == 1 and  len(distribusi[5].split('&')) == 1:
+    if len(odc_split[3].split(',')) == 1 and len(odc_out[3].split(',')) == 1 and len(odc_out[5].split(',')) == 1 and  len(distribusi[5].split(',')) == 1:
         odc_out_port = odc_out[3]
         odc_out_core = odc_out[5]
         odc_splt_out = odc_split[3]
         d_core       = distribusi[5]
 
-    elif len(odc_split[3].split('&')) >= 1 and len(odc_out[3].split('&')) >= 1 and len(odc_out[5].split('&')) >= 1 and len(distribusi[5].split('&')) >= 1:
-        if len(odc_split[3].split('&')) != len(odc_out[3].split('&')) or len(odc_split[3].split('&')) != len(odc_out[5].split('&')) or len(odc_split[3].split('&')) != len(distribusi[5].split('&')):
+    elif len(odc_split[3].split(',')) >= 1 and len(odc_out[3].split(',')) >= 1 and len(odc_out[5].split(',')) >= 1 and len(distribusi[5].split(',')) >= 1:
+        if len(odc_split[3].split(',')) != len(odc_out[3].split(',')) or len(odc_split[3].split(',')) != len(odc_out[5].split(',')) or len(odc_split[3].split(',')) != len(distribusi[5].split(',')):
             update.message.reply_text('Jumlah port splitter dan dengan panel out(port / core) atau port distribusi tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
-        odc_out_port = odc_out[3].split('&')
-        odc_out_core = odc_out[5].split('&')
-        odc_splt_out = odc_split[3].split('&')
-        d_core       = distribusi[5].split('&')
+        odc_out_port = odc_out[3].split(',')
+        odc_out_core = odc_out[5].split(',')
+        odc_splt_out = odc_split[3].split(',')
+        d_core       = distribusi[5].split(',')
     
     for x in range(len(odc_out_port)):
         detail                        = {}
@@ -157,7 +157,8 @@ def odc_location(update, context):
     sql_maincore = {}
 
     for x in range(len(data)):
-        sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
+        # sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
+        sql_odc = "(NULL,'{}','{}','{}',{},'{}','{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),str(data[x]['description']))
         sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
@@ -182,10 +183,10 @@ def odc_location(update, context):
     cursor  = conn.cursor()
     try:
         cursor.execute("insert into valdat_odc values"+sql_odc+"")
-        update.message.reply_text('ODC baru telah terdaftar')
+        update.message.reply_text('Terima Kasih, Input Sukses')
         conn.commit()
     except:
-        update.message.reply_text('ODC terdaftar')
+        update.message.reply_text('Input Error')
         conn.rollback()
         conn.close()
         # update.message.reply_text('ODC already exist')        
@@ -202,10 +203,9 @@ def odc_location(update, context):
                 conn.commit()
             else:
                 update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
-                
     # conn.commit()
     except:
-        update.message.reply_text("Gagal input data  odc , ulangi lagi /odc")
+        update.message.reply_text("Gagal input data  odc, ulangi lagi /odc")
         conn.rollback()
         conn.close()
 
@@ -219,11 +219,11 @@ def ValdatMaincoreOdp(update, context):
     user = update.message.from_user
     update.message.reply_text('''
 ODP-BLB-FBM/12
-DS 3 KAP 12 CORE 6&7
+DS 3 KAP 12 CORE 6,7,8
 FBM/D03/13.01
 5 SPL-C KAP 8
 QRCODE ODP : T3P0DXI5KKFM
-QRCODE PORT : T3P0MUTW56R8 & T3P0FLL5638K
+QRCODE PORT : T3P0MUTW56R8 , T3P0FLL5638K
 ALAMAT : PERUMAHAN PLAOSAN PERMAI BLOK  D-69
 KELURAHAN : PANDANWANGI
 KECAMATAN : BELIMBING
@@ -249,16 +249,16 @@ def MaincoreOdp(update, context):
     qrcode_port                 = split_message[5].split(':')
     d_core,odp_qr= {},{}
 
-    if len(distribusi[5].split('&')) == 1 and len(qrcode_port[1].split('&')) == 1:
+    if len(distribusi[5].split(',')) == 1 and len(qrcode_port[1].split(',')) == 1:
         d_core                  = distribusi[5]
         odp_qr                  = qrcode_port[1]
 
-    elif len(distribusi[5].split('&')) >= 1:
-        if len(distribusi[5].split('&'))  != len(qrcode_port[1].split('&')):
+    elif len(distribusi[5].split(',')) >= 1:
+        if len(distribusi[5].split(','))  != len(qrcode_port[1].split(',')):
             update.message.reply_text('Jumlah core pada odp distribusi dan qrcode port tidak sama, silahkan ulang lagi /start')
             return ConversationHandler.END
-        d_core                  = distribusi[5].split('&')
-        odp_qr                  = qrcode_port[1].split('&')
+        d_core                  = distribusi[5].split(',')
+        odp_qr                  = qrcode_port[1].split(',')
     
     for x in range(len(d_core)):
         detail = {}
