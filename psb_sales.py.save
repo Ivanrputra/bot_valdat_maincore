@@ -19,7 +19,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 # import goto
-from requests_toolbelt.adapters import host_header_ssl
+
 import logging
 import requests
 import json
@@ -137,10 +137,8 @@ def cek_sc(update, context):
     return CONFIRM
 
 def get_sc(sc):
-    s = requests.Session()
-    s.mount('https://', host_header_ssl.HostHeaderSSLAdapter())
-    a = s.get("https://10.62.130.80/backend/public/api/tracking?_dc=1533002388191&ScNoss=true&Field=ORDER_ID&SearchText="+sc, headers={"Host": "telkom.co.id"})
-    return a
+    url = "http://10.62.130.80/backend/public/api/tracking?_dc=1533002388191&ScNoss=true&Field=ORDER_ID&SearchText=" + sc
+    return requests.get(url,headers={'host':'telkom.co.id'})
 
 def list_data(data):
     facts = list()
