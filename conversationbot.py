@@ -157,13 +157,14 @@ def odc_location(update, context):
     data    = context.user_data 
     sql_odc     = ""
     sql_maincore = {}
-
-    cursor.execute("select id from ezpro_sto where name = '"+str(data[0]['sto'])+"'")
+    conn    = connection()
+    cursor  = conn.cursor()
+    cursor.execute("select id from valdat_sto where abbreviation_name = '"+str(data[0]['sto'])+"'")
     id_sto = cursor.fetchone()
 
     for x in range(len(data)):
         # sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
-        sql_odc = "('{}','{}','{}',{},'{}',{})".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),str(data[x]['odc_long']),int(data[x]['odc_kap']),str(data[x]['description']),id_sto)
+        sql_odc = "('{}','{}','{}',{},'{}',{})".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),str(data[x]['odc_long']),int(data[x]['odc_kap']),str(data[x]['description']),int(id_sto[0]))
         sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
@@ -184,8 +185,6 @@ def odc_location(update, context):
         # update.message.reply_text(data[x])
     # sql_maincore = sql_maincore[1:]
     # update.message.reply_text(sql_maincore)
-    conn    = connection()
-    cursor  = conn.cursor()
     # print("insert into valdat_odc (name,latitude,longitude,cap,description) values"+sql_odc+"")
     cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
     id_odp = cursor.fetchone()
@@ -211,7 +210,7 @@ def odc_location(update, context):
             cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
             exiss = int(cursor.fetchone()[0])
             if exiss<1:
-                update.message.reply_text(sql_maincore[x])
+                # update.message.reply_text(sql_maincore[x])
                 cursor.execute("insert into valdat_maincore values"+sql_maincore[x]+"")
                 conn.commit()
             # else:
@@ -304,8 +303,8 @@ def odp_location(update, context):
     except:
         update.message.reply_text('ODC tidak terdaftar, ulangi lagi, /odc /odp')
         conn.rollback()
-        conn.close()
-        return ConversationHandler.END
+        # conn.close()
+        # return ConversationHandler.END
 
     try:
         cursor.execute("select id from valdat_odpmaster where name = '"+str(data['odp_name'])+"'")
@@ -321,8 +320,8 @@ def odp_location(update, context):
     except:
         update.message.reply_text('Gagal input ODP ke database, /odc /odp')
         conn.rollback()
-        conn.close()
-        return ConversationHandler.END        
+        # conn.close()
+        # return ConversationHandler.END        
     update.message.reply_text('Terima Kasih anda berhasil validasi mancore odp')
     conn.close()
     return ConversationHandler.END
