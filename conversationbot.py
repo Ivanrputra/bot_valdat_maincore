@@ -99,6 +99,7 @@ def MaincoreOdc(update, context):
         detail                        = {}
         #1
         detail['odc_name']            = odc[0]
+        detail['sto']                 = odc[0].split('-')[1]
         detail['odc_kap']             = odc[2]
         #3
         detail['in_tray']             = odc_in[1]
@@ -157,9 +158,12 @@ def odc_location(update, context):
     sql_odc     = ""
     sql_maincore = {}
 
+    cursor.execute("select id from ezpro_sto where name = '"+str(data[0]['sto'])+"'")
+    id_sto = cursor.fetchone()
+
     for x in range(len(data)):
         # sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
-        sql_odc = "('{}','{}','{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),str(data[x]['odc_long']),int(data[x]['odc_kap']),str(data[x]['description']))
+        sql_odc = "('{}','{}','{}',{},'{}',{})".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),str(data[x]['odc_long']),int(data[x]['odc_kap']),str(data[x]['description']),id_sto)
         sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
@@ -193,19 +197,15 @@ def odc_location(update, context):
         id_odp = int(id_odp[0])
 
     try:
-        cursor.execute("insert into valdat_odc (name,latitude,longitude,cap,description) values"+sql_odc+"")
+        cursor.execute("insert into valdat_odc (name,latitude,longitude,cap,description,sto_id) values"+sql_odc+"")
         conn.commit()
     except:
         conn.rollback()
         # conn.close()
     try:
-        print("oo")
         cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name'])+"'")
-        print("oo")
         id_odc = int(cursor.fetchone()[0])
-        print("oo")
         for x in range(len(sql_maincore)):
-            print("12")
             sql_maincore[x] = sql_maincore[x].replace("id_to_odc",str(id_odc))
             sql_maincore[x] = sql_maincore[x].replace("id_to_odp",str(id_odp))
             cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
