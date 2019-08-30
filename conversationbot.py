@@ -59,9 +59,8 @@ SPL-B 5 PORT 1,2,3
 TO
 OTB 9 PORT 6,7,8 CORE 6,7,8
 DS 3 KAP 12 CORE 6,7,8
+ODP-BLB-FBM/12
 KET : FEEDER LOSS
-STO BLB
-KAP_DIS 12
 ''')
     return MAINCORE_ODC
 
@@ -70,7 +69,7 @@ def MaincoreOdc(update, context):
     user = update.message.from_user
     split_message = update.message.text.splitlines()
 
-    if len(split_message) != 11:
+    if len(split_message) != 10:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
     #
@@ -120,11 +119,13 @@ def MaincoreOdc(update, context):
         detail['distribusi_kap']      = distribusi[3]
         detail['distribusi_core']     = d_core[x]
         #9
-        detail['description']         = split_message[8].split(':')[1]
+        detail['odp_name']                 = split_message[8]
         #10
-        detail['sto']                 = split_message[9].split()[1]
-        #11
-        detail['cap_dis']             = split_message[10].split()[1]
+        detail['description']         = split_message[9].split(':')[1]
+        #10
+        # detail['sto']                 = split_message[9].split()[1]
+        # #11
+        # detail['cap_dis']             = split_message[10].split()[1]
         # kapasitas in and out panel
         if detail['odc_kap'] == '144':
             detail['in_kap']          = 12
@@ -158,7 +159,7 @@ def odc_location(update, context):
 
     for x in range(len(data)):
         # sql_odc = "(NULL,'{}','{}','{}',{},'{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),int(data[x]['cap_dis']),str(data[x]['description']))
-        sql_odc = "(NULL,'{}','{}','{}',{},'{}','{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),data[x]['odc_long'],int(data[x]['odc_kap']),str(data[x]['sto']),str(data[x]['description']))
+        sql_odc = "('{}','{}','{}',{},'{}')".format(str(data[x]['odc_name']),str(data[x]['odc_lat']),str(data[x]['odc_long']),int(data[x]['odc_kap']),str(data[x]['description']))
         sql_maincore[x] = "(NULL,{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{})".format(
             int(data[x]['in_tray']),
             int(data[x]['in_port']),
@@ -174,40 +175,54 @@ def odc_location(update, context):
             int(data[x]['distribusi_kap']),
             int(data[x]['distribusi_core']),
             "id_to_odc",
-            'NULL'
+            "id_to_odp"
             )
         # update.message.reply_text(data[x])
     # sql_maincore = sql_maincore[1:]
     # update.message.reply_text(sql_maincore)
     conn    = connection()
     cursor  = conn.cursor()
+    # print("insert into valdat_odc (name,latitude,longitude,cap,description) values"+sql_odc+"")
+    cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
+    id_odp = cursor.fetchone()
+    if id_odp is None:
+        cursor.execute("insert into valdat_odpmaster (name) values ('"+str(data[0]['odp_name'])+"')")
+        conn.commit()
+        id_odp = cursor.lastrowid
+    else:
+        id_odp = int(id_odp[0])
+
     try:
-        cursor.execute("insert into valdat_odc values"+sql_odc+"")
-        update.message.reply_text('Terima Kasih, Input Sukses')
+        cursor.execute("insert into valdat_odc (name,latitude,longitude,cap,description) values"+sql_odc+"")
         conn.commit()
     except:
-        update.message.reply_text('Input Error')
         conn.rollback()
-        conn.close()
-        # update.message.reply_text('ODC already exist')        
+        # conn.close()
     try:
-        cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name']+"'"))
+        print("oo")
+        cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name'])+"'")
+        print("oo")
         id_odc = int(cursor.fetchone()[0])
+        print("oo")
         for x in range(len(sql_maincore)):
+            print("12")
             sql_maincore[x] = sql_maincore[x].replace("id_to_odc",str(id_odc))
+            sql_maincore[x] = sql_maincore[x].replace("id_to_odp",str(id_odp))
             cursor.execute("select count(id) from valdat_maincore where distribution_to = "+data[x]['distribusi_ke']+" and distribution_cap = "+data[x]['distribusi_kap']+" and distribution_core = "+data[x]['distribusi_core']+" and odc_id = "+str(id_odc))
             exiss = int(cursor.fetchone()[0])
             if exiss<1:
-                # update.message.reply_text(sql_maincore[x])
+                update.message.reply_text(sql_maincore[x])
                 cursor.execute("insert into valdat_maincore values"+sql_maincore[x]+"")
                 conn.commit()
-            else:
-                update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
+            # else:
+                # update.message.reply_text("data maincore \nODC = "+data[0]['odc_name']+" \ndistribution_to = "+data[x]['distribusi_ke']+" and \ndistribution_cap = "+data[x]['distribusi_kap']+" and \ndistribution_core = "+data[x]['distribusi_core']+" sudah ada ")
+        update.message.reply_text('Terima Kasih, Input Sukses')
     # conn.commit()
     except:
         update.message.reply_text("Gagal input data  odc, ulangi lagi /odc")
         conn.rollback()
         conn.close()
+        return MAINCORE_ODC
 
     conn.close()
     # update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
@@ -218,18 +233,15 @@ def odc_location(update, context):
 def ValdatMaincoreOdp(update, context):
     user = update.message.from_user
     update.message.reply_text('''
-ODP-BLB-FBM/12
-DS 3 KAP 12 CORE 6,7,8
-FBM/D03/13.01
-5 SPL-C KAP 8
+ODP-BLB-FBM/12 KAP 16
+SPL-C,SPL-C,SPL-A
 QRCODE ODP : T3P0DXI5KKFM
 QRCODE PORT : T3P0MUTW56R8 , T3P0FLL5638K
 ALAMAT : PERUMAHAN PLAOSAN PERMAI BLOK  D-69
 KELURAHAN : PANDANWANGI
 KECAMATAN : BELIMBING
-KET : FEEDER LOSS
-TO
 ODC-BLB-FBM
+KET : GENDONG
 ''')
     return MAINCORE_ODP
 
@@ -238,53 +250,33 @@ def MaincoreOdp(update, context):
     context.user_data.clear()
     user = update.message.from_user
     split_message = update.message.text.splitlines()
-
-    if len(split_message) != 12:
+    if len(split_message) != 9:
         update.message.reply_text('Input anda kurang atau berlebih silahkan ulangi lagi /start')
         return ConversationHandler.END        
-    #
-    distribusi                  = split_message[1].split()
-    splitter                    = split_message[3].split()
-    #
-    qrcode_port                 = split_message[5].split(':')
-    d_core,odp_qr= {},{}
+    # qrcode_port                 = split_message[3].split(':')
+    # odp_qr= {}
 
-    if len(distribusi[5].split(',')) == 1 and len(qrcode_port[1].split(',')) == 1:
-        d_core                  = distribusi[5]
-        odp_qr                  = qrcode_port[1]
-
-    elif len(distribusi[5].split(',')) >= 1:
-        if len(distribusi[5].split(','))  != len(qrcode_port[1].split(',')):
-            update.message.reply_text('Jumlah core pada odp distribusi dan qrcode port tidak sama, silahkan ulang lagi /start')
-            return ConversationHandler.END
-        d_core                  = distribusi[5].split(',')
-        odp_qr                  = qrcode_port[1].split(',')
+    # if len(qrcode_port[1].split(',')) == 1:
+    #     odp_qr                  = qrcode_port[1]
+    # odp_qr                  = qrcode_port[1].split(',')
     
-    for x in range(len(d_core)):
-        detail = {}
-        #1
-        detail['odp_name']            = split_message[0]
-        #2
-        detail['distribusi_ke']       = distribusi[1]
-        detail['distribusi_kap']      = distribusi[3]
-        detail['distribusi_core']     = d_core[x]
-        #3
-        detail['odp_index']           = split_message[2] 
-        #4
-        detail['splitter_no']         = splitter[0]
-        detail['splitter_name']       = splitter[1]+'.1-01'
-        detail['splitter_kap']        = splitter[3]
-        #5-9
-        detail['odp_qrcode']          = split_message[4].split(':')[1]
-        detail['odp_port_qrcore']     = odp_qr[x]#split_message[4].split(':')[1]
-        detail['odp_address']         = split_message[6].split(':')[1]
-        detail['odp_kelurahan']       = split_message[7].split(':')[1]
-        detail['odp_kecamatan']       = split_message[8].split(':')[1]
-        #10
-        detail['description']         = split_message[9].split(':')[1]
-        detail['odc_name']            = split_message[11]
-        
-        context.user_data[x] = detail
+    # for x in range(len(odp_qr)):
+    detail = {}
+    detail['odp_name']            = split_message[0].split()[0]
+
+    detail['splitter_no']         = '1'
+    detail['splitter_name']       = split_message[1]
+    detail['splitter_kap']        = split_message[0].split()[2]
+
+    detail['odp_qrcode']          = split_message[2].split(':')[1]
+    detail['odp_port_qrcode']     = split_message[3]
+    detail['odp_address']         = split_message[4].split(':')[1]
+    detail['odp_kelurahan']       = split_message[5].split(':')[1]
+    detail['odp_kecamatan']       = split_message[6].split(':')[1]
+    detail['odc_name']            = split_message[7]
+    detail['description']         = split_message[8].split(':')[1]
+    context.user_data['data'] = detail
+
     logger.info(context.user_data)
     update.message.reply_text('Masukkan koordinat ODP')
 
@@ -293,24 +285,21 @@ def MaincoreOdp(update, context):
 def odp_location(update, context):
     user = update.message.from_user
     user_location = update.message.location
-
     location = {}
     location['odp_lat']             = user_location.latitude
     location['odp_long']            = user_location.longitude
-    for x in range(len(context.user_data)):
-        context.user_data[x].update(location)
+    context.user_data['data'].update(location)
 
-    data = context.user_data
+    data = context.user_data['data']
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
-    data = context.user_data 
     sql_distribusi,sql_odp = "",""
 
     conn    = connection()
     cursor  = conn.cursor()
-
+    print("select id from valdat_odc where name = '"+str(data['odc_name'])+"'")
     try:
-        cursor.execute("select id from valdat_odc where name = '"+str(data[0]['odc_name'])+"'")
+        cursor.execute("select id from valdat_odc where name = '"+str(data['odc_name'])+"'")
         id_odc = int(cursor.fetchone()[0])
     except:
         update.message.reply_text('ODC tidak terdaftar, ulangi lagi, /odc /odp')
@@ -319,36 +308,22 @@ def odp_location(update, context):
         return ConversationHandler.END
 
     try:
-        cursor.execute("select id from valdat_odpmaster where name = '"+str(data[0]['odp_name'])+"'")
+        cursor.execute("select id from valdat_odpmaster where name = '"+str(data['odp_name'])+"'")
         odp_id=cursor.fetchone()
         if odp_id is None:
-            sqllll = ("insert into valdat_odpmaster values "+
-            "(NULL,'"+str(data[0]['odp_name'])+"',NULL,'"+str(data[0]['odp_index'])+"',"+data[0]['splitter_no']+",'"+str(data[0]['splitter_name'])+"',"+data[0]['splitter_kap']+",'"+str(data[0]['odp_qrcode'])+"','"+str(data[0]['odp_port_qrcore'])+"','"+str(data[0]['odp_address'])+"','"+str(data[0]['odp_kelurahan'])+"','"+str(data[0]['odp_kecamatan'])+"','"+str(data[0]['odp_lat'])+"','"+str(data[0]['odp_long'])+"','"+str(data[0]['description'])+"',NULL,'asd',"+str(id_odc)+")")
+            sqllll = ("insert into valdat_odpmaster (name,splitter_no,splitter_name,splitter_kap,qrcode_odp,qrcode_port,address,urban_village,sub_district,lat,longitude,description,odc_id) values "+
+            "('"+str(data['odp_name'])+"',"+data['splitter_no']+",'"+str(data['splitter_name'])+"',"+data['splitter_kap']+",'"+str(data['odp_qrcode'])+"','"+str(data['odp_port_qrcore'])+"','"+str(data['odp_address'])+"','"+str(data['odp_kelurahan'])+"','"+str(data['odp_kecamatan'])+"','"+str(data['odp_lat'])+"','"+str(data['odp_long'])+"','"+str(data['description'])+"',"+str(id_odc)+")")
             cursor.execute(sqllll)
             conn.commit()
             odp_id = cursor.lastrowid
-        else :        
+        else:
             odp_id = int(odp_id[0])
     except:
         update.message.reply_text('Gagal input ODP ke database, /odc /odp')
         conn.rollback()
         conn.close()
         return ConversationHandler.END        
-    
-    try:
-    #doesnt hancle if maincore doessnt exist
-        for x in range(len(data)):
-            sqllll = "update valdat_maincore as m inner join valdat_odc as o on m.odc_id = o.id "+"set m.odp_id = "+str(odp_id)+" where "+"o.name = '"+str(data[x]['odc_name'])+"' " +" and m.distribution_to   = "+str(data[x]['distribusi_ke'])+"" +" and m.distribution_cap  = "+str(data[x]['distribusi_kap'])+"" +" and m.distribution_core = "+str(data[x]['distribusi_core']+"")
-            cursor.execute(sqllll)
-        conn.commit()
-        update.message.reply_text('Terima Kasih Anda telah berhasil input Validasi Maincore, klik /start untuk validasi lagi')
-    except:
-        update.message.reply_text('Gagal Update Maincore ulangi lagi, /odc /odp')
-        conn.rollback()
-        conn.close()
-        return ConversationHandler.END        
-
-
+    update.message.reply_text('Terima Kasih anda berhasil validasi mancore odp')
     conn.close()
     return ConversationHandler.END
 
@@ -455,7 +430,7 @@ def main():
     )
 
     cek_myir_handler = ConversationHandler(
-        entry_points=[CommandHandler('cek_myir', StartCekMYIR)],
+        entry_points=[CommandHandler('cek_pelanggan', StartCekMYIR)],
 
         states={
             CEK_MYIR: [MessageHandler(Filters.text, Cek_MYIR)],
@@ -486,17 +461,15 @@ def main():
     dp.add_error_handler(error)
 
     # Start the Bot
-#    updater.start_polling()
+    updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.start_webhook(listen="0.0.0.0",
-        port=8443,
-#	key='private.key',
-#	cert='cert.pem',
-        url_path='900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA')
-    updater.bot.set_webhook("https://pandaimandaman.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
+    # updater.start_webhook(listen="0.0.0.0",
+    #     port=8443,
+    #     url_path='900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA')
+    # updater.bot.set_webhook("https://pandaimandaman.localtunnel.me/900688850:AAE4KtOWwlNlIRnf-JgtQPxfAyRLpceApxA")
     updater.idle()
 
 if __name__ == '__main__':

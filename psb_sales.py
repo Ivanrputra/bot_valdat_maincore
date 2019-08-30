@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 ID_PSB,SC, INET,TELP,SID,PELGN,ALAMAT,STO,ODP_WO,ODP_REAL,PORT,DC,QR_CODE,ONT,\
 STB,TAG_ODP,TAG_PELGN,HOBBY, PHOTO, LOCATION, BIO, INPUT, CEK_SC, CONFIRM, \
 RUMAH_PELANGGAN, PETUGAS_PELANGGAN, PETUGAS_LAYANAN, HASIL_REDAMAN, PERANGKAT_ONTSTB, FOTO_ODP, CHECK_MYIR, \
-CONFIRM_SALES, SALES_RUMAH_PELANGGAN, SALES_LOKASI_PELANGGAN = range(34)
+CONFIRM_SALES, SALES_RUMAH_PELANGGAN, SALES_LOKASI_PELANGGAN,REDAMAN = range(35)
 
 db_conn.connect()
 
@@ -224,9 +224,16 @@ def sn_stb(update, context):
     # global data
     user = update.message.from_user
     context.user_data['data']['MAC STB'] = update.message.text
-    update.message.reply_text("Masukkan data tag ODP :",reply_markup=ReplyKeyboardRemove())
-    return TAG_ODP
+    update.message.reply_text("Masukkan Digit Redaman :",reply_markup=ReplyKeyboardRemove())
+    return REDAMAN
 
+def redaman(update, context):
+    # global data
+    user = update.message.from_user
+    context.user_data['data']['REDAMAN'] = update.message.text
+    update.message.reply_text("Masukkan data tag ODP :",reply_markup=ReplyKeyboardRemove())
+    return TAG_ODP    
+    
 def tag_odp(update, context):
     # global data
     user = update.message.from_user
@@ -473,8 +480,8 @@ def sales_lokasi_pelanggan(update, context):
     cursor = db_conn.query(sql)
     db_conn.comit()
     #pandaiman
-
     context.user_data['data']['FOTO RUMAH PELANGGAN'] = " ✔️ "
+    context.user_data['data']['TAG LOKASI PELANGGAN'] = " ✔️ "
     update.message.reply_text("Data \n" "{}".format(list_data(context.user_data['data'])))
     update.message.reply_text("Terimakasih Data Telah Tersimpan", reply_markup=ReplyKeyboardRemove())
 
@@ -504,6 +511,7 @@ def main():
             QR_CODE: [MessageHandler(Filters.text, qr_code)],
             ONT: [MessageHandler(Filters.text, sn_ont)],
             STB: [MessageHandler(Filters.text, sn_stb)],
+            REDAMAN: [MessageHandler(Filters.text, redaman)],
             TAG_ODP: [MessageHandler(Filters.location, tag_odp)],
             TAG_PELGN: [MessageHandler(Filters.location, tag_pelanggan)],
             RUMAH_PELANGGAN: [MessageHandler(Filters.photo, foto_rumah_pelanggan)],
@@ -520,7 +528,7 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel)]
     )
     sales_handler = ConversationHandler(
-        entry_points=[CommandHandler('SALES', start_sales)],
+        entry_points=[CommandHandler('input_pelanggan', start_sales)],
 
         states={
             CHECK_MYIR : [MessageHandler(Filters.text, check_myir)],

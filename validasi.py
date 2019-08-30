@@ -64,15 +64,25 @@ def validasiodp(update, context):
     context.user_data.clear()
     user = update.message.from_user
     logger.info("User %s Memilih %s", user.first_name, update.message.text)
-    update.message.reply_text('odp :\n'
-                "kap:\n"
-                "Redaman:\n"
-                "qrcode odp :\n"
-                "qrport port :\n"
-                "1:\n"
-                "2:\n"
-                "3.1:\n"
-                "3.2:\n"
+    update.message.reply_text(
+                # 'odp :\n'
+                # "kap:\n"
+                # "Redaman:\n"
+                # "qrcode odp :\n"
+                # "qrport port :\n"
+                # "1:\n"
+                # "2:\n"
+                # "3.1:\n"
+                # "3.2:\n"
+                "odp : _\n"
+                "kap : _\n"
+                "Redaman : _\n"
+                "qrcode odp : _\n"
+                "qrport port : _\n"
+                "1: _\n"
+                "2: _\n"
+                "3.1: _\n"
+                "3.2: _\n"
                 "dst(Sesuai Jumlah Port)",
                               reply_markup=ReplyKeyboardRemove())
 
@@ -314,16 +324,17 @@ def location(update, context):
     context.user_data['long'] = user_location.longitude
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
-    update.message.reply_text('Lokasi Berhasil Disimpan.\nSilahkan Upload Foto ODP Tampak Luar:')
+    update.message.reply_text('Lokasi Berhasil Disimpan.')
+    update.message.reply_text('Silahkan Upload Foto ODP Tampak Luar:')
 
-    update.message.reply_text(context.user_data[0])
+    # update.message.reply_text(context.user_data[0])
 
     return PHOTO1
 
 def photo1(update, context):
     user = update.message.from_user
     dire = context.user_data[0][0].split(":")[1].strip().replace("/","-")
-    context.user_data['path'] = '../media/valdat_odp/'+str(datetime.date.today())+'/'+dire
+    context.user_data['path'] = '../valdat_web/media/valdat_odp/'+str(datetime.date.today())+'/'+dire
     photo_file = update.message.photo[-1].get_file()
     try:
         os.makedirs(context.user_data['path'])
@@ -333,7 +344,8 @@ def photo1(update, context):
     context.user_data['odp_luar'] = context.user_data['path']+'/odp_luar.jpg'
     
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Foto ODP Tampak Luar Berhasil Disimpan.\nSilahkan Upload Foto ODP Tampak Dalam:')
+    update.message.reply_text('Foto ODP Tampak Luar Berhasil Disimpan.')
+    update.message.reply_text('Silahkan Upload Foto ODP Tampak Dalam:')
 
     return PHOTO2
 
@@ -345,7 +357,8 @@ def photo2(update, context):
     context.user_data['odp_dalam'] = context.user_data['path']+'/odp_dalam.jpg'
 
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Foto ODP Tampak Dalam Berhasil Disimpan.\nSilahkan Upload Foto Port ODP:')
+    update.message.reply_text('Foto ODP Tampak Dalam Berhasil Disimpan.')
+    update.message.reply_text('Silahkan Upload Foto Port ODP:')
 
     return PHOTO3
 
@@ -357,7 +370,8 @@ def photo3(update, context):
     context.user_data['odp_port'] = context.user_data['path']+'/odp_port.jpg'
 
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Foto Port ODP Berhasil Disimpan.\nSilahkan Upload Foto QRCode ODP:')
+    update.message.reply_text('Foto Port ODP Berhasil Disimpan.')
+    update.message.reply_text('Silahkan Upload Foto QRCode ODP:')
 
     return PHOTO4
 
@@ -369,7 +383,8 @@ def photo4(update, context):
     context.user_data['qrcode_odp'] = context.user_data['path']+'/qrcode_odp.jpg'
 
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text('Foto QRCode ODP Berhasil Disimpan.\nSilahkan Upload Foto Redaman ODP:')
+    update.message.reply_text('Foto QRCode ODP Berhasil Disimpan.')
+    update.message.reply_text('Silahkan Upload Foto Redaman ODP:')
 
     return PHOTO5
 
@@ -413,9 +428,8 @@ def photo5(update, context):
             a+=1
 
         for x in media:
-            sql = (" insert into valdat_evidence (url,category_id,odp_id) values ('"+
+            sql = ("insert into valdat_evidence (url,odp_id) values ('"+
                 str(x)+"',"+
-                str(1)+","+
                 str(idodp)+") ")
             print(sql)
             cursor = psb_sales_conn.query(sql)
@@ -456,7 +470,7 @@ def error(update, context):
 
 def main():
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('valdat_odp', start)],
+        entry_points=[CommandHandler('telnet', start)],
 
         states={
             VALIDASIODP: [RegexHandler('^(Validasiodp)$', validasiodp)],

@@ -42,6 +42,7 @@ TAG_ODP_MIGRATE, DC_LENGTH, QR_CODE_MIGRATE, QRCODE_DROPCORE, NO_INET_MIGRATE, N
 db_conn.connect()
 
 def start_expand(update, context):
+	context.user_data.clear()
 	update.message.reply_text(
 		 'Hi!ヽ(^o^)丿 Aku adalah valdat bot. '
 		 'Ketik /cancel untuk berhenti .\n\n',reply_markup=ReplyKeyboardRemove())	
@@ -51,6 +52,7 @@ def start_expand(update, context):
 	return SC_NUMBER
 
 def start_omset(update, context):
+	context.user_data.clear()
 	update.message.reply_text(
 		 'Hi!ヽ(^o^)丿 Aku adalah valdat bot. '
 		 'Ketik /cancel untuk berhenti .\n\n',reply_markup=ReplyKeyboardRemove())	
@@ -60,6 +62,7 @@ def start_omset(update, context):
 	return CEK_IN_OMSET
 
 def start_migrate(update, context):
+	context.user_data.clear()
 	update.message.reply_text(
 		'Hi!ヽ(^o^)丿 Aku adalah valdat bot. '
 		'Ketik /cancel untuk berhenti .\n\n',reply_markup=ReplyKeyboardRemove())	
