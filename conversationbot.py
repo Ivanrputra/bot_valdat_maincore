@@ -26,7 +26,10 @@ import validasi
 #bot validasi TELKOM UNIVERSITY
 import psb_sales
 #bot fala, pkl UB
-import expand_omset_migrate
+#spiegan
+import omset
+import expand
+import migrate
 
 
 import urllib.request
@@ -450,10 +453,13 @@ def main():
     dp.add_handler(sales)
 
     #UB
-    expand,omset,migrate = expand_omset_migrate.main()
-    dp.add_handler(expand)
-    dp.add_handler(omset)
-    dp.add_handler(migrate)
+    #spiegan
+    omsets = omset.main()
+    expands = expand.main()
+    migrates = migrate.main()
+    dp.add_handler(omsets)
+    dp.add_handler(expands)
+    dp.add_handler(migrates)
     # dp.add_handler(expand_omset_migrate.main())
     
     # log all errors
